@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Fiszki Pro iOS</title>
+    <script src="words.js"></script>
     <style>
         :root {
             --bg-main: #000000;
@@ -30,7 +31,7 @@
         body {
             background-color: var(--bg-main);
             color: var(--text-main);
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, Roboto, sans-serif;
             min-height: 100dvh;
             display: flex;
             flex-direction: column;
@@ -50,7 +51,6 @@
             flex-direction: column;
         }
 
-        /* Header */
         header {
             display: flex;
             justify-content: space-between;
@@ -69,30 +69,30 @@
             color: var(--text-sub);
         }
 
-        .status-badge {
+        .cloud-badge {
             background-color: var(--bg-card);
             border: 1px solid var(--border-color);
             padding: 6px 10px;
             border-radius: 20px;
-            font-size: 11px;
+            font-size: 10px;
+            font-weight: 600;
             color: var(--text-sub);
             display: flex;
             align-items: center;
             gap: 6px;
         }
 
-        .status-dot {
+        .cloud-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background-color: var(--text-sub);
+            background-color: var(--accent-orange);
         }
 
-        .status-dot.active {
+        .cloud-dot.synced {
             background-color: var(--accent-green);
         }
 
-        /* Segmented Control Tabs */
         .tab-switcher {
             display: flex;
             background-color: var(--bg-card);
@@ -112,7 +112,6 @@
             color: var(--text-sub);
             border-radius: 9px;
             cursor: pointer;
-            transition: all 0.2s ease;
             text-align: center;
         }
 
@@ -121,7 +120,6 @@
             color: var(--text-main);
         }
 
-        /* Counter Grid */
         .counter-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -134,24 +132,9 @@
             margin-bottom: 12px;
         }
 
-        .counter-item {
-            cursor: pointer;
-        }
+        .counter-num { font-size: 16px; font-weight: 700; display: block; }
+        .counter-label { font-size: 9px; color: var(--text-sub); text-transform: uppercase; font-weight: 600; }
 
-        .counter-num {
-            font-size: 16px;
-            font-weight: 700;
-            display: block;
-        }
-
-        .counter-label {
-            font-size: 9px;
-            color: var(--text-sub);
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-
-        /* 3D Card Flip Safari WebKit Optimized */
         .card-perspective {
             perspective: 1000px;
             -webkit-perspective: 1000px;
@@ -198,54 +181,13 @@
             border: 2px solid var(--accent-blue);
         }
 
-        .card-lang {
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-sub);
-        }
+        .card-lang { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-sub); }
+        .card-text { font-size: 26px; font-weight: 800; color: var(--text-main); word-break: break-word; }
+        .card-desc { font-size: 12px; color: var(--text-sub); font-style: italic; margin-top: 4px; }
+        .card-hint { font-size: 10px; color: var(--text-sub); }
 
-        .card-text {
-            font-size: 26px;
-            font-weight: 800;
-            color: var(--text-main);
-            word-break: break-word;
-        }
-
-        .card-desc {
-            font-size: 12px;
-            color: var(--text-sub);
-            font-style: italic;
-            margin-top: 4px;
-        }
-
-        .card-hint {
-            font-size: 10px;
-            color: var(--text-sub);
-        }
-
-        /* Controls Grid */
-        .controls-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-top: 12px;
-        }
-
-        .srs-btn {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            padding: 10px 4px;
-            border-radius: var(--radius-btn);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2px;
-            cursor: pointer;
-        }
-
-        .srs-btn:active { transform: scale(0.96); }
+        .controls-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+        .srs-btn { background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 10px 4px; border-radius: var(--radius-btn); display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; }
         .srs-btn.redo { border-color: rgba(255, 69, 58, 0.4); color: var(--accent-red); }
         .srs-btn.good { border-color: rgba(10, 132, 255, 0.4); color: var(--accent-blue); }
         .srs-btn.easy { border-color: rgba(48, 209, 88, 0.4); color: var(--accent-green); }
@@ -253,226 +195,29 @@
         .srs-title { font-size: 12px; font-weight: 700; }
         .srs-sub { font-size: 9px; color: var(--text-sub); }
 
-        /* Quiz Card */
-        .quiz-card {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            margin: auto 0;
-        }
+        .quiz-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 16px; margin: auto 0; }
+        .quiz-options { display: grid; grid-template-columns: 1fr; gap: 8px; }
+        .quiz-opt-btn { background-color: var(--bg-card-secondary); border: 1px solid var(--border-color); color: var(--text-main); padding: 12px 14px; border-radius: 12px; font-size: 14px; font-weight: 600; text-align: left; cursor: pointer; }
+        .quiz-opt-btn.correct { background-color: rgba(48, 209, 88, 0.2) !important; border-color: var(--accent-green) !important; color: var(--accent-green) !important; }
+        .quiz-opt-btn.wrong { background-color: rgba(255, 69, 58, 0.2) !important; border-color: var(--accent-red) !important; color: var(--accent-red) !important; }
 
-        .quiz-options {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 8px;
-        }
+        .form-card { background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 16px; border-radius: var(--radius-main); display: flex; flex-direction: column; gap: 10px; }
+        .form-title { font-size: 13px; font-weight: 700; color: var(--text-main); }
 
-        .quiz-opt-btn {
-            background-color: var(--bg-card-secondary);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 12px 14px;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            text-align: left;
-            cursor: pointer;
-        }
+        .btn-primary { background-color: var(--accent-green); color: #000; font-weight: 700; font-size: 13px; padding: 12px; border: none; border-radius: 10px; cursor: pointer; text-align: center; }
+        .btn-secondary { background-color: var(--bg-card-secondary); color: var(--text-main); font-weight: 600; font-size: 12px; padding: 10px; border: 1px solid var(--border-color); border-radius: 10px; cursor: pointer; text-align: center; }
 
-        .quiz-opt-btn.correct {
-            background-color: rgba(48, 209, 88, 0.2) !important;
-            border-color: var(--accent-green) !important;
-            color: var(--accent-green) !important;
-        }
-
-        .quiz-opt-btn.wrong {
-            background-color: rgba(255, 69, 58, 0.2) !important;
-            border-color: var(--accent-red) !important;
-            color: var(--accent-red) !important;
-        }
-
-        /* Forms */
-        .form-card {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            padding: 16px;
-            border-radius: var(--radius-main);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .form-title {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--text-main);
-        }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .input-label {
-            font-size: 10px;
-            font-weight: 600;
-            text-transform: uppercase;
-            color: var(--text-sub);
-        }
-
-        input[type="text"], textarea {
-            background-color: var(--bg-main);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 10px 12px;
-            border-radius: 10px;
-            font-size: 13px;
-            width: 100%;
-            outline: none;
-            font-family: inherit;
-        }
-
-        input[type="text"]:focus, textarea:focus {
-            border-color: var(--accent-blue);
-        }
-
-        .btn-primary {
-            background-color: var(--accent-green);
-            color: #000;
-            font-weight: 700;
-            font-size: 13px;
-            padding: 12px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            text-align: center;
-        }
-
-        .btn-secondary {
-            background-color: var(--bg-card-secondary);
-            color: var(--text-main);
-            font-weight: 600;
-            font-size: 12px;
-            padding: 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            cursor: pointer;
-            text-align: center;
-        }
-
-        /* List Items */
-        .word-item {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            padding: 12px;
-            border-radius: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 6px;
-        }
-
+        .word-item { background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 12px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
         .word-pl { font-weight: 700; font-size: 13px; color: var(--text-main); }
         .word-en { font-weight: 700; font-size: 13px; color: var(--accent-blue); }
-        .word-sub { font-size: 10px; color: var(--text-sub); margin-top: 2px; }
 
-        .tag {
-            font-size: 9px;
-            padding: 2px 6px;
-            border-radius: 8px;
-            font-weight: 600;
-            background-color: var(--bg-card-secondary);
-            color: var(--text-sub);
-        }
-
-        .tag.mastered { background-color: rgba(48, 209, 88, 0.15); color: var(--accent-green); }
-        .tag.learning { background-color: rgba(10, 132, 255, 0.15); color: var(--accent-blue); }
-
-        /* Navigation Bar iOS */
-        nav {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background-color: rgba(28, 28, 30, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-top: 1px solid var(--border-color);
-            padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
-            display: flex;
-            justify-content: space-around;
-            z-index: 100;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 3px;
-            background: none;
-            border: none;
-            color: var(--text-sub);
-            font-size: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            flex: 1;
-        }
-
+        nav { position: fixed; bottom: 0; left: 0; right: 0; background-color: rgba(28, 28, 30, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid var(--border-color); padding: 8px 12px calc(8px + env(safe-area-inset-bottom)); display: flex; justify-content: space-around; z-index: 100; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; background: none; border: none; color: var(--text-sub); font-size: 10px; font-weight: 600; cursor: pointer; flex: 1; }
         .nav-item.active { color: var(--accent-blue); }
         .nav-icon { width: 18px; height: 18px; fill: currentColor; }
 
-        /* Toast */
-        #toast {
-            position: fixed;
-            top: calc(12px + env(safe-area-inset-top));
-            left: 50%;
-            transform: translateX(-50%) translateY(-100px);
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 10px 16px;
-            border-radius: 18px;
-            font-size: 12px;
-            font-weight: 600;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
-            transition: transform 0.3s ease;
-            z-index: 200;
-            pointer-events: none;
-        }
-
+        #toast { position: fixed; top: calc(12px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%) translateY(-100px); background-color: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); padding: 10px 16px; border-radius: 18px; font-size: 12px; font-weight: 600; box-shadow: 0 8px 20px rgba(0,0,0,0.6); transition: transform 0.3s ease; z-index: 200; pointer-events: none; }
         #toast.show { transform: translateX(-50%) translateY(0); }
-
-        /* Modal */
-        #modal-overlay {
-            position: fixed;
-            inset: 0;
-            background-color: rgba(0,0,0,0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 16px;
-            z-index: 300;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s ease;
-        }
-
-        #modal-overlay.show { opacity: 1; pointer-events: auto; }
-
-        .modal-body {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            padding: 16px;
-            width: 100%;
-            max-width: 320px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
 
         .hidden { display: none !important; }
     </style>
@@ -480,21 +225,19 @@
 <body>
 
     <div class="app-container">
-        <!-- HEADER -->
         <header>
             <div>
                 <h1 class="brand-title">Fiszki Pro</h1>
-                <p class="brand-sub">Polski &ndash; Angielski</p>
+                <p class="brand-sub">Auto-Sync z Chmurą</p>
             </div>
-            <div class="status-badge">
-                <span class="status-dot" id="status-dot"></span>
-                <span id="status-text">Lokalnie</span>
+            <div class="cloud-badge">
+                <span class="cloud-dot" id="cloud-dot"></span>
+                <span id="cloud-status-text">Lokalnie</span>
             </div>
         </header>
 
         <!-- TAB 1: LEARN -->
         <section id="view-learn" style="flex: 1; display: flex; flex-direction: column;">
-            
             <div class="tab-switcher">
                 <button class="tab-btn active" id="btn-mode-flashcards" onclick="switchLearnMode('flashcards')">Fiszki 3D</button>
                 <button class="tab-btn" id="btn-mode-quiz" onclick="switchLearnMode('quiz')">Quiz 1 z 4</button>
@@ -517,23 +260,20 @@
                     </div>
                 </div>
 
-                <!-- Direction & Manual Nav -->
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                     <select id="direction-select" onchange="changeDirection()" style="background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 8px; font-size: 11px;">
                         <option value="PL-EN">Polski &rarr; Angielski</option>
                         <option value="EN-PL">Angielski &rarr; Polski</option>
-                        <option value="MIX">Losowy kierunek</option>
                     </select>
                     <span id="session-counter" style="font-size: 11px; color: var(--text-sub); font-weight: 600;">0 / 0</span>
                 </div>
 
-                <!-- 3D Card -->
                 <div class="card-perspective" id="card-touch-area" onclick="flipCard()">
                     <div class="card-inner" id="card-inner">
                         <div class="card-face card-front">
                             <span class="card-lang" id="front-lang-title">Polski</span>
                             <div>
-                                <div class="card-text" id="front-text">Brak słówek</div>
+                                <div class="card-text" id="front-text">Ładowanie...</div>
                                 <div class="card-desc" id="front-desc"></div>
                             </div>
                             <span class="card-hint">Dotknij, aby odwrócić</span>
@@ -541,7 +281,7 @@
                         <div class="card-face card-back">
                             <span class="card-lang" id="back-lang-title" style="color: var(--accent-blue);">English</span>
                             <div>
-                                <div class="card-text" id="back-text">No words</div>
+                                <div class="card-text" id="back-text">...</div>
                                 <div class="card-desc" id="back-desc"></div>
                             </div>
                             <span class="card-hint">Dotknij, aby ukryć</span>
@@ -549,17 +289,15 @@
                     </div>
                 </div>
 
-                <!-- Manual Nav Bar -->
                 <div style="display: flex; justify-content: space-between; margin-top: 8px;">
                     <button class="btn-secondary" onclick="prevCard()" style="padding: 6px 12px; font-size: 11px;">&larr; Poprzednia</button>
                     <button class="btn-secondary" onclick="nextCard()" style="padding: 6px 12px; font-size: 11px;">Następna &rarr;</button>
                 </div>
 
-                <!-- SRS Rating Buttons -->
                 <div class="controls-grid">
                     <button class="srs-btn redo" onclick="rateWord(1)">
                         <span class="srs-title">Ponów</span>
-                        <span class="srs-sub">w tej sesji</span>
+                        <span class="srs-sub">na koniec</span>
                     </button>
                     <button class="srs-btn good" onclick="rateWord(3)">
                         <span class="srs-title">Dobrze</span>
@@ -586,65 +324,23 @@
 
         <!-- TAB 2: WORDS -->
         <section id="view-words" class="hidden">
-            <div class="tab-switcher">
-                <button class="tab-btn active" id="tab-add-single" onclick="switchAddMode('single')">Dodawanie</button>
-                <button class="tab-btn" id="tab-add-bulk" onclick="switchAddMode('bulk')">Import listy</button>
+            <div class="form-card">
+                <div class="form-title">Źródło słówek: words.js</div>
+                <p style="font-size: 11px; color: var(--text-sub); line-height: 1.4;">
+                    Słówka są automatycznie wczytywane z pliku <code style="color:var(--accent-blue)">words.js</code>. Dodawaj nowe słówka na GitHubie kiedy chcesz &ndash; Twój postęp nauki pozostaje bezpieczny w chmurze!
+                </p>
+                <button class="btn-secondary" onclick="reloadFromWordsJs()">Odśwież słówka z words.js</button>
             </div>
-
-            <!-- Form Single -->
-            <div class="form-card" id="form-single">
-                <div class="form-title">Dodaj nowe słówko</div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
-                    <div class="input-group">
-                        <label class="input-label">Polski</label>
-                        <input type="text" id="input-pl" placeholder="np. Pies">
-                    </div>
-                    <div class="input-group">
-                        <label class="input-label">Angielski</label>
-                        <input type="text" id="input-en" placeholder="np. Dog">
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label class="input-label">Opis (Opcjonalnie)</label>
-                    <input type="text" id="input-desc" placeholder="np. Mój pies goni koty.">
-                </div>
-                <button class="btn-primary" onclick="addSingleWord()">Zapisz do bazy</button>
+            <div style="margin-top: 12px;">
+                <input type="text" id="search-bar" oninput="renderWordsList()" placeholder="Szukaj słówka..." style="background:var(--bg-card); border:1px solid var(--border-color); color:#fff; padding:10px; border-radius:10px; width:100%; font-size:12px;">
             </div>
-
-            <!-- Form Bulk -->
-            <div class="form-card hidden" id="form-bulk">
-                <div class="form-title">Wklej całą listę</div>
-                <p style="font-size: 10px; color: var(--text-sub);">Format: 1 słówko na linijkę (np. <code style="color:var(--accent-blue)">kot - cat</code>)</p>
-                <textarea id="bulk-text" rows="4" placeholder="pies - dog&#10;kot - cat&#10;drzewo - tree"></textarea>
-                <button class="btn-primary" style="background-color: var(--accent-orange);" onclick="importBulkWords()">Zaimportuj listę</button>
-            </div>
-
-            <div style="margin-top: 12px; display: flex; gap: 8px;">
-                <input type="text" id="search-bar" oninput="renderWordsList()" placeholder="Szukaj Słówka...">
-                <button class="btn-secondary" onclick="restoreDefaultWords()" style="white-space: nowrap; font-size: 10px;">Reset Słówek</button>
-            </div>
-
             <div id="words-list-container" style="margin-top: 10px;"></div>
         </section>
 
         <!-- TAB 3: STATS -->
         <section id="view-stats" class="hidden" style="display: flex; flex-direction: column; gap: 12px;">
             <div class="form-card">
-                <div class="form-title">Dzisiejsza Aktywność</div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; text-align: center;">
-                    <div style="background-color: var(--bg-main); padding: 10px; border-radius: 10px;">
-                        <span style="font-size: 20px; font-weight: 800; color: var(--accent-blue);" id="stat-today-val">0</span>
-                        <p style="font-size: 9px; color: var(--text-sub);">Przejrzane dzisiaj</p>
-                    </div>
-                    <div style="background-color: var(--bg-main); padding: 10px; border-radius: 10px;">
-                        <span style="font-size: 20px; font-weight: 800; color: var(--accent-orange);" id="stat-streak-val">0d</span>
-                        <p style="font-size: 9px; color: var(--text-sub);">Seria dni (Streak)</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-card">
-                <div class="form-title">Podsumowanie Bazy</div>
+                <div class="form-title">Twój Postęp</div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; text-align: center;">
                     <div style="background-color: var(--bg-main); padding: 10px; border-radius: 10px;">
                         <span style="font-size: 20px; font-weight: 800; color: #fff;" id="stat-total-val">0</span>
@@ -656,51 +352,35 @@
                     </div>
                 </div>
             </div>
-
-            <div class="form-card">
-                <div class="form-title">Rozkład Powtórek</div>
-                <div style="height: 10px; background: var(--bg-main); border-radius: 5px; overflow: hidden; display: flex; margin-top: 6px;">
-                    <div id="bar-mastered" style="width: 0%; background: var(--accent-green); height: 100%;"></div>
-                    <div id="bar-learning" style="width: 0%; background: var(--accent-blue); height: 100%;"></div>
-                    <div id="bar-new" style="width: 0%; background: var(--border-color); height: 100%;"></div>
-                </div>
-                <div style="display: flex; justify-content: space-between; font-size: 9px; color: var(--text-sub); margin-top: 4px;">
-                    <span style="color: var(--accent-green);">Opanowane (<span id="pct-mastered">0%</span>)</span>
-                    <span style="color: var(--accent-blue);">W nauce (<span id="pct-learning">0%</span>)</span>
-                    <span>Nowe (<span id="pct-new">0%</span>)</span>
-                </div>
-            </div>
         </section>
 
-        <!-- TAB 4: SYNC -->
+        <!-- TAB 4: SYNC & CLOUD -->
         <section id="view-sync" class="hidden" style="display: flex; flex-direction: column; gap: 12px;">
             <div class="form-card">
-                <div class="form-title">Błyskawiczna Chmura (Szybki Kod)</div>
+                <div class="form-title">1. Automatyczny Zapis w Chmurze</div>
                 <p style="font-size: 11px; color: var(--text-sub); line-height: 1.3;">
-                    Wygeneruj jednorazowy kod na Macu, a następnie wpisz go na iPhonie lub iPadzie.
+                    Ustaw swój unikalny klucz (np. <code style="color:var(--accent-blue)">maciek-cae-2026</code>). Postęp powtórek będzie się zapisywał automatycznie w chmurze przy każdej ocenionej fiszce!
                 </p>
-
-                <div id="sync-code-area" style="margin-top: 6px;">
-                    <button class="btn-primary" style="background-color: var(--accent-blue); color: white;" onclick="generateCloudCode()">Wygeneruj kod synchronizacji</button>
+                <div style="display: flex; gap: 6px; margin-top: 4px;">
+                    <input type="text" id="cloud-key-input" placeholder="Wpisz Twój klucz..." style="background:var(--bg-main); border:1px solid var(--border-color); color:#fff; padding:10px; border-radius:10px; font-size:12px; flex:1;">
+                    <button class="btn-primary" style="padding:10px 14px;" onclick="setCloudKey()">Zapisz Klucz</button>
                 </div>
-
-                <div style="border-top: 1px solid var(--border-color); margin-top: 10px; padding-top: 10px; display: flex; flex-direction: column; gap: 6px;">
-                    <label class="input-label">Masz kod z drugiego urządzenia?</label>
-                    <input type="text" id="sync-code-input" placeholder="Wpisz np. 649201" style="text-align: center; font-family: monospace; font-size: 16px;">
-                    <button class="btn-secondary" onclick="loadFromCloudCode()">Pobierz słówka z kodu</button>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 4px;">
+                    <button class="btn-secondary" onclick="forceCloudPush()">Pchnij do chmury</button>
+                    <button class="btn-secondary" onclick="forceCloudPull()">Pobierz z chmury</button>
                 </div>
             </div>
 
             <div class="form-card">
-                <div class="form-title">Kopia Zapasowa (Plik .json w iCloud)</div>
+                <div class="form-title">2. Kopia Zapasowa do Pliku (iCloud Drive)</div>
                 <p style="font-size: 11px; color: var(--text-sub); line-height: 1.3;">
-                    Pobierz plik `.json` ze wszystkimi słówkami do folderu w iCloud i wgraj go na innym urządzeniu.
+                    Żelazny zapas: w dowolnym momencie możesz zapisać plik z całą historią SRS bezpośrednio na iCloud Drive.
                 </p>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 4px;">
-                    <button class="btn-secondary" onclick="exportToFile()">Pobierz .json</button>
+                    <button class="btn-secondary" onclick="exportProgress()">Pobierz (.json)</button>
                     <label class="btn-secondary" style="text-align: center; cursor: pointer;">
                         Wgraj plik
-                        <input type="file" id="file-import-input" accept=".json" onchange="importFromFile(event)" style="display: none;">
+                        <input type="file" accept=".json" onchange="importProgress(event)" style="display: none;">
                     </label>
                 </div>
             </div>
@@ -723,143 +403,138 @@
         </button>
         <button class="nav-item" id="nav-sync" onclick="switchNav('sync')">
             <svg class="nav-icon" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM19 18H6c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95C8.08 7.14 9.94 6 12 6c2.62 0 4.88 1.86 5.39 4.43l.3 1.5 1.53.11c1.56.1 2.78 1.41 2.78 2.96 0 1.65-1.35 3-3 3z"/></svg>
-            Kopia
+            Chmura
         </button>
     </nav>
 
-    <!-- TOAST -->
     <div id="toast"><span id="toast-txt">Pomyślnie zaktualizowano</span></div>
 
-    <!-- MODAL -->
-    <div id="modal-overlay">
-        <div class="modal-body">
-            <h3 id="modal-title" style="font-size: 15px; font-weight: 700;">Potwierdzenie</h3>
-            <p id="modal-msg" style="font-size: 12px; color: var(--text-sub);"></p>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                <button class="btn-secondary" onclick="closeModal()">Anuluj</button>
-                <button class="btn-primary" style="background-color: var(--accent-red); color: white;" id="modal-confirm-btn">Potwierdź</button>
-            </div>
-        </div>
-    </div>
-
     <script>
-        const sampleWords = [
-            { id: "s1", pl: "Cześć", en: "Hello", desc: "Podstawowe przywitanie", status: "new", efactor: 2.5, repetitions: 0, interval: 0, nextReviewDate: 0 },
-            { id: "s2", pl: "Dziękuję", en: "Thank you", desc: "Wyraz wdzięczności", status: "new", efactor: 2.5, repetitions: 0, interval: 0, nextReviewDate: 0 },
-            { id: "s3", pl: "Książka", en: "Book", desc: "Przedmiot do czytania", status: "new", efactor: 2.5, repetitions: 0, interval: 0, nextReviewDate: 0 },
-            { id: "s4", pl: "Pies", en: "Dog", desc: "Zwierzę domowe", status: "new", efactor: 2.5, repetitions: 0, interval: 0, nextReviewDate: 0 },
-            { id: "s5", pl: "Kot", en: "Cat", desc: "Mały ssak domowy", status: "new", efactor: 2.5, repetitions: 0, interval: 0, nextReviewDate: 0 },
-            { id: "s6", pl: "Jabłko", en: "Apple", desc: "Owoc z drzewa", status: "new", efactor: 2.5, repetitions: 0, interval: 0, nextReviewDate: 0 },
-            { id: "s7", pl: "Komputer", en: "Computer", desc: "Urządzenie elektroniczne", status: "new", efactor: 2.5, repetitions: 0, interval: 0, nextReviewDate: 0 },
-            { id: "s8", pl: "Samochód", en: "Car", desc: "Pojazd kołowy", status: "new", efactor: 2.5, repetitions: 0, interval: 0, nextReviewDate: 0 },
-            { id: "s9", pl: "Szkoła", en: "School", desc: "Miejsce nauki", status: "new", efactor: 2.5, repetitions: 0, interval: 0, nextReviewDate: 0 },
-            { id: "s10", pl: "Woda", en: "Water", desc: "Niezbędny płyn", status: "new", efactor: 2.5, repetitions: 0, interval: 0, nextReviewDate: 0 },
-            { id: "s11", pl: "Dzień", en: "Day", desc: "Czas od wschodu do zachodu", status: "new", efactor: 2.5, repetitions: 0, interval: 0, nextReviewDate: 0 },
-            { id: "s12", pl: "Noc", en: "Night", desc: "Pora ciemności", status: "new", efactor: 2.5, repetitions: 0, interval: 0, nextReviewDate: 0 }
-        ];
-
         let words = [];
-        try {
-            const saved = localStorage.getItem('fiszki_ios_v6');
-            if (saved && JSON.parse(saved).length > 0) {
-                words = JSON.parse(saved);
-            } else {
-                words = [...sampleWords];
-                localStorage.setItem('fiszki_ios_v6', JSON.stringify(words));
-            }
-        } catch(e) {
-            words = [...sampleWords];
-        }
-
         let filteredWords = [];
         let currentIndex = 0;
         let isFlipped = false;
         let activeFilter = 'all';
         let currentLearnMode = 'flashcards';
         let cardDirection = 'PL-EN';
-
-        let activeCloudCode = localStorage.getItem('fiszki_active_code') || null;
-
-        let statsData = {
-            todayCount: 0,
-            lastDate: '',
-            streak: 0
-        };
-
-        function loadStatsData() {
-            try {
-                const savedStats = localStorage.getItem('fiszki_ios_stats_v1');
-                if (savedStats) {
-                    statsData = JSON.parse(savedStats);
-                }
-            } catch(e) {}
-
-            const todayStr = new Date().toISOString().slice(0, 10);
-            if (statsData.lastDate !== todayStr) {
-                const yesterday = new Date();
-                yesterday.setDate(yesterday.getDate() - 1);
-                const yesterdayStr = yesterday.toISOString().slice(0, 10);
-
-                if (statsData.lastDate !== yesterdayStr && statsData.lastDate !== '') {
-                    statsData.streak = 0;
-                }
-                statsData.todayCount = 0;
-            }
-        }
-
-        function recordActivity() {
-            loadStatsData();
-            const todayStr = new Date().toISOString().slice(0, 10);
-
-            if (statsData.lastDate !== todayStr) {
-                const yesterday = new Date();
-                yesterday.setDate(yesterday.getDate() - 1);
-                const yesterdayStr = yesterday.toISOString().slice(0, 10);
-
-                if (statsData.lastDate === yesterdayStr) {
-                    statsData.streak += 1;
-                } else {
-                    statsData.streak = 1;
-                }
-                statsData.lastDate = todayStr;
-                statsData.todayCount = 0;
-            }
-
-            statsData.todayCount += 1;
-            localStorage.setItem('fiszki_ios_stats_v1', JSON.stringify(statsData));
-            updateStatsView();
-        }
+        let userCloudKey = localStorage.getItem('fiszki_cloud_key') || '';
 
         document.addEventListener('DOMContentLoaded', () => {
-            setupFormEvents();
+            initApp();
             setupTouchGestures();
+            if (userCloudKey) {
+                document.getElementById('cloud-key-input').value = userCloudKey;
+                autoPullFromCloud();
+            }
+        });
+
+        async function initApp() {
+            const rawList = window.myVocabularyList || [
+                { pl: "Cześć", en: "Hello", desc: "Podstawowe przywitanie" },
+                { pl: "Dziękuję", en: "Thank you", desc: "Wyraz wdzięczności" }
+            ];
+
+            let savedProgress = {};
+            try {
+                savedProgress = JSON.parse(localStorage.getItem('fiszki_srs_data')) || {};
+            } catch(e) {}
+
+            words = rawList.map((item) => {
+                const id = "w_" + btoa(unescape(encodeURIComponent(item.pl + "_" + item.en)));
+                const srs = savedProgress[id] || {};
+                return {
+                    id: id,
+                    pl: item.pl,
+                    en: item.en,
+                    desc: item.desc || "",
+                    status: srs.status || 'new',
+                    efactor: srs.efactor || 2.5,
+                    repetitions: srs.repetitions || 0,
+                    interval: srs.interval || 0,
+                    nextReviewDate: srs.nextReviewDate || 0
+                };
+            });
+
             applyLearningSession();
             updateStatsView();
-            updateSyncBadge();
-        });
+            updateCloudBadgeStatus();
+        }
+
+        function updateCloudBadgeStatus() {
+            const dot = document.getElementById('cloud-dot');
+            const txt = document.getElementById('cloud-status-text');
+            if (userCloudKey) {
+                dot.classList.add('synced');
+                txt.innerText = userCloudKey;
+            } else {
+                dot.classList.remove('synced');
+                txt.innerText = "Lokalnie";
+            }
+        }
+
+        function setCloudKey() {
+            const val = document.getElementById('cloud-key-input').value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+            if (!val) {
+                showToast("Wpisz prawidłowy klucz!");
+                return;
+            }
+            userCloudKey = val;
+            localStorage.setItem('fiszki_cloud_key', userCloudKey);
+            updateCloudBadgeStatus();
+            showToast("Zapisano klucz chmury!");
+            forceCloudPull();
+        }
+
+        async function autoPullFromCloud() {
+            if (!userCloudKey) return;
+            try {
+                const res = await fetch(`https://kvdb.io/4yKqT5E7U21L5K1A9Z9X7Y/${userCloudKey}`);
+                if (res.ok) {
+                    const cloudSrs = await res.json();
+                    if (cloudSrs && typeof cloudSrs === 'object') {
+                        localStorage.setItem('fiszki_srs_data', JSON.stringify(cloudSrs));
+                        initApp();
+                        showToast("Zsynchronizowano z chmurą!");
+                    }
+                }
+            } catch(e) {
+                console.log("Używam bazy lokalnej");
+            }
+        }
+
+        async function autoPushToCloud() {
+            if (!userCloudKey) return;
+            try {
+                const progress = localStorage.getItem('fiszki_srs_data') || '{}';
+                await fetch(`https://kvdb.io/4yKqT5E7U21L5K1A9Z9X7Y/${userCloudKey}`, {
+                    method: 'POST',
+                    body: progress
+                });
+                updateCloudBadgeStatus();
+            } catch(e) {}
+        }
+
+        function forceCloudPush() {
+            if (!userCloudKey) { showToast("Ustaw najpierw klucz!"); return; }
+            autoPushToCloud();
+            showToast("Wysłano postęp do chmury!");
+        }
+
+        function forceCloudPull() {
+            if (!userCloudKey) { showToast("Ustaw najpierw klucz!"); return; }
+            autoPullFromCloud();
+        }
+
+        function reloadFromWordsJs() {
+            initApp();
+            showToast("Wczytano słówka z pliku!");
+        }
 
         function showToast(msg) {
             const t = document.getElementById('toast');
             document.getElementById('toast-txt').innerText = msg;
             t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 2800);
-        }
-
-        function showModal(title, msg, onConfirm) {
-            document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-msg').innerText = msg;
-            const overlay = document.getElementById('modal-overlay');
-            overlay.classList.add('show');
-
-            const confirmBtn = document.getElementById('modal-confirm-btn');
-            confirmBtn.onclick = () => {
-                onConfirm();
-                closeModal();
-            };
-        }
-
-        function closeModal() {
-            document.getElementById('modal-overlay').classList.remove('show');
+            setTimeout(() => t.classList.remove('show'), 2500);
         }
 
         function switchNav(tabId) {
@@ -867,7 +542,6 @@
                 document.getElementById(`view-${t}`).classList.add('hidden');
                 document.getElementById(`nav-${t}`).classList.remove('active');
             });
-
             document.getElementById(`view-${tabId}`).classList.remove('hidden');
             document.getElementById(`nav-${tabId}`).classList.add('active');
 
@@ -878,41 +552,29 @@
 
         function setupTouchGestures() {
             const touchArea = document.getElementById('card-touch-area');
-            let startX = 0;
-            let startY = 0;
-
+            let startX = 0; let startY = 0;
             touchArea.addEventListener('touchstart', (e) => {
                 startX = e.changedTouches[0].screenX;
                 startY = e.changedTouches[0].screenY;
             }, false);
-
             touchArea.addEventListener('touchend', (e) => {
-                const endX = e.changedTouches[0].screenX;
-                const endY = e.changedTouches[0].screenY;
-                const diffX = endX - startX;
-                const diffY = endY - startY;
-
+                const diffX = e.changedTouches[0].screenX - startX;
+                const diffY = e.changedTouches[0].screenY - startY;
                 if (Math.abs(diffX) > 50 && Math.abs(diffY) < 40) {
-                    if (diffX < 0) {
-                        nextCard();
-                    } else {
-                        prevCard();
-                    }
+                    if (diffX < 0) nextCard();
+                    else prevCard();
                 }
             }, false);
         }
 
-        /* LEARN MODES LOGIC */
         function switchLearnMode(mode) {
             currentLearnMode = mode;
             ['flashcards', 'quiz'].forEach(m => {
                 document.getElementById(`mode-${m}`).classList.add('hidden');
                 document.getElementById(`btn-mode-${m}`).classList.remove('active');
             });
-
             document.getElementById(`mode-${mode}`).classList.remove('hidden');
             document.getElementById(`btn-mode-${mode}`).classList.add('active');
-
             renderCurrentMode();
         }
 
@@ -921,7 +583,7 @@
             renderCard();
         }
 
-        function updateCounters() {
+        function applyLearningSession() {
             const now = Date.now();
             const due = words.filter(w => w.nextReviewDate <= now && w.repetitions > 0);
             const newWords = words.filter(w => w.repetitions === 0);
@@ -930,19 +592,10 @@
             document.getElementById('count-due').innerText = due.length;
             document.getElementById('count-new').innerText = newWords.length;
             document.getElementById('count-future').innerText = future.length;
-        }
 
-        function applyLearningSession() {
-            const now = Date.now();
-            const due = words.filter(w => w.nextReviewDate <= now && w.repetitions > 0);
-            const newWords = words.filter(w => w.repetitions === 0);
-            const future = words.filter(w => w.nextReviewDate > now && w.repetitions > 0);
-
-            updateCounters();
-
-            if (activeFilter === 'due') filteredWords = [...due];
-            else if (activeFilter === 'new') filteredWords = [...newWords];
-            else if (activeFilter === 'future') filteredWords = [...future];
+            if (activeFilter === 'due') filteredWords = due;
+            else if (activeFilter === 'new') filteredWords = newWords;
+            else if (activeFilter === 'future') filteredWords = future;
             else filteredWords = [...due, ...newWords, ...future];
 
             currentIndex = 0;
@@ -959,56 +612,35 @@
             else if (currentLearnMode === 'quiz') renderQuiz();
         }
 
-        /* MODE A: FLASHCARDS */
         function renderCard() {
             const inner = document.getElementById('card-inner');
             inner.classList.remove('flipped');
             isFlipped = false;
 
             const counterEl = document.getElementById('session-counter');
-
             if (filteredWords.length === 0) {
                 document.getElementById('front-text').innerText = "Koniec fiszek!";
-                document.getElementById('front-desc').innerText = "Świetna robota! Pula pusta.";
+                document.getElementById('front-desc').innerText = "Wszystkie słówka opanowane.";
                 document.getElementById('back-text').innerText = "Brawo!";
-                document.getElementById('back-desc').innerText = "";
                 counterEl.innerText = "0 / 0";
                 return;
             }
 
-            if (currentIndex >= filteredWords.length) {
-                currentIndex = 0;
-            }
-
             counterEl.innerText = `${currentIndex + 1} / ${filteredWords.length}`;
             const w = filteredWords[currentIndex];
+            const isReversed = cardDirection === 'EN-PL';
 
-            let isReversed = false;
-            if (cardDirection === 'EN-PL') isReversed = true;
-            else if (cardDirection === 'MIX') isReversed = Math.random() < 0.5;
+            document.getElementById('front-lang-title').innerText = isReversed ? "English" : "Polski";
+            document.getElementById('front-text').innerText = isReversed ? w.en : w.pl;
+            document.getElementById('front-desc').innerText = w.desc || "";
 
-            if (!isReversed) {
-                document.getElementById('front-lang-title').innerText = "Polski";
-                document.getElementById('front-text').innerText = w.pl;
-                document.getElementById('front-desc').innerText = w.desc || "";
-
-                document.getElementById('back-lang-title').innerText = "English";
-                document.getElementById('back-text').innerText = w.en;
-                document.getElementById('back-desc').innerText = w.desc || "";
-            } else {
-                document.getElementById('front-lang-title').innerText = "English";
-                document.getElementById('front-text').innerText = w.en;
-                document.getElementById('front-desc').innerText = w.desc || "";
-
-                document.getElementById('back-lang-title').innerText = "Polski";
-                document.getElementById('back-text').innerText = w.pl;
-                document.getElementById('back-desc').innerText = w.desc || "";
-            }
+            document.getElementById('back-lang-title').innerText = isReversed ? "Polski" : "English";
+            document.getElementById('back-text').innerText = isReversed ? w.pl : w.en;
+            document.getElementById('back-desc').innerText = w.desc || "";
 
             const ef = w.efactor || 2.5;
             const rep = w.repetitions || 0;
             const curInt = w.interval || 0;
-
             let goodInt = rep === 0 ? 1 : (rep === 1 ? 4 : Math.round(curInt * ef));
             let easyInt = Math.round((goodInt || 1) * (ef + 0.2));
             if (easyInt <= goodInt) easyInt = goodInt + 2;
@@ -1049,56 +681,44 @@
                 if (quality < 3) {
                     rep = 0;
                     interval = 1;
-                    filteredWords.push(current);
-                } else if (quality === 3) {
+                    const redoWord = filteredWords.splice(currentIndex, 1)[0];
+                    filteredWords.push(redoWord);
+                } else {
                     if (rep === 0) interval = 1;
                     else if (rep === 1) interval = 4;
                     else interval = Math.round(interval * ef);
                     rep++;
-                } else { // Łatwo! (quality = 5)
-                    if (rep === 0) interval = 4;
-                    else if (rep === 1) interval = 7;
-                    else interval = Math.round(interval * ef * 1.4);
-                    rep++;
-                }
+                    
+                    ef = ef + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
+                    if (ef < 1.3) ef = 1.3;
+                    if (ef > 3.0) ef = 3.0;
 
-                ef = ef + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
-                if (ef < 1.3) ef = 1.3;
-                if (ef > 3.0) ef = 3.0;
+                    w.efactor = ef;
+                    w.repetitions = rep;
+                    w.interval = interval;
+                    w.nextReviewDate = Date.now() + (interval * 86400000);
+                    w.status = interval > 15 ? 'mastered' : 'learning';
 
-                w.efactor = ef;
-                w.repetitions = rep;
-                w.interval = interval;
-                w.nextReviewDate = Date.now() + (interval * 86400000);
-                w.status = interval > 15 ? 'mastered' : 'learning';
-
-                recordActivity();
-                saveWords();
-
-                filteredWords.splice(currentIndex, 1);
-                if (filteredWords.length > 0) {
-                    if (currentIndex >= filteredWords.length) {
+                    saveProgress();
+                    if (currentIndex < filteredWords.length - 1) {
+                        currentIndex++;
+                    } else {
                         currentIndex = 0;
                     }
                 }
 
-                updateCounters();
+                showToast(quality < 3 ? "Powtórzymy na końcu" : `Zapamiętano! Za ${interval}d`);
                 renderCurrentMode();
-                showToast(quality < 3 ? "Słówko wróci na koniec powtórki" : `Zapisano! Powtórka za: ${interval}d`);
             }
         }
 
-        /* MODE B: QUIZ */
         function renderQuiz() {
             const container = document.getElementById('quiz-options-container');
             container.innerHTML = "";
-
             if (filteredWords.length === 0) {
                 document.getElementById('quiz-question-text').innerText = "Brak słówek!";
                 return;
             }
-
-            if (currentIndex >= filteredWords.length) currentIndex = 0;
 
             const current = filteredWords[currentIndex];
             document.getElementById('quiz-question-text').innerText = current.pl;
@@ -1106,150 +726,45 @@
             let options = [current.en];
             let otherWords = words.filter(w => w.id !== current.id);
             otherWords.sort(() => 0.5 - Math.random());
-            
             for (let i = 0; i < Math.min(3, otherWords.length); i++) {
                 options.push(otherWords[i].en);
             }
-
             options.sort(() => 0.5 - Math.random());
 
             options.forEach(opt => {
                 const btn = document.createElement('button');
                 btn.className = 'quiz-opt-btn';
                 btn.innerText = opt;
-                btn.onclick = () => checkQuizAnswer(btn, opt, current.en);
+                btn.onclick = () => {
+                    if (opt === current.en) {
+                        btn.classList.add('correct');
+                        setTimeout(() => rateWord(3), 600);
+                    } else {
+                        btn.classList.add('wrong');
+                        setTimeout(() => rateWord(1), 1000);
+                    }
+                };
                 container.appendChild(btn);
             });
         }
 
-        function checkQuizAnswer(btn, selected, correct) {
-            const buttons = document.querySelectorAll('.quiz-opt-btn');
-            buttons.forEach(b => b.disabled = true);
-
-            if (selected.toLowerCase().trim() === correct.toLowerCase().trim()) {
-                btn.classList.add('correct');
-                showToast("Poprawnie!");
-                setTimeout(() => { rateWord(3); }, 700);
-            } else {
-                btn.classList.add('wrong');
-                buttons.forEach(b => {
-                    if (b.innerText.toLowerCase().trim() === correct.toLowerCase().trim()) {
-                        b.classList.add('correct');
-                    }
-                });
-                showToast("Błąd!");
-                setTimeout(() => { rateWord(1); }, 1200);
-            }
-        }
-
-        /* FORM EVENTS */
-        function setupFormEvents() {
-            const pl = document.getElementById('input-pl');
-            const en = document.getElementById('input-en');
-            const desc = document.getElementById('input-desc');
-
-            pl.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') { e.preventDefault(); en.focus(); }
-            });
-            en.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') { e.preventDefault(); addSingleWord(); }
-            });
-            desc.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') { e.preventDefault(); addSingleWord(); }
-            });
-        }
-
-        function switchAddMode(mode) {
-            if (mode === 'single') {
-                document.getElementById('form-single').classList.remove('hidden');
-                document.getElementById('form-bulk').classList.add('hidden');
-                document.getElementById('tab-add-single').classList.add('active');
-                document.getElementById('tab-add-bulk').classList.remove('active');
-            } else {
-                document.getElementById('form-single').classList.add('hidden');
-                document.getElementById('form-bulk').classList.remove('hidden');
-                document.getElementById('tab-add-single').classList.remove('active');
-                document.getElementById('tab-add-bulk').classList.add('active');
-            }
-        }
-
-        function addSingleWord() {
-            const pl = document.getElementById('input-pl').value.trim();
-            const en = document.getElementById('input-en').value.trim();
-            const desc = document.getElementById('input-desc').value.trim();
-
-            if (!pl || !en) {
-                showToast("Uzupełnij polski i angielski!");
-                return;
-            }
-
-            words.push({
-                id: Date.now().toString() + Math.random().toString(36).substring(2, 5),
-                pl, en, desc,
-                status: 'new', efactor: 2.5, repetitions: 0, interval: 0, nextReviewDate: 0
-            });
-
-            saveWords();
-            document.getElementById('input-pl').value = "";
-            document.getElementById('input-en').value = "";
-            document.getElementById('input-desc').value = "";
-            document.getElementById('input-pl').focus();
-
-            showToast("Słówko dodane!");
-            renderWordsList();
-        }
-
-        function importBulkWords() {
-            const txt = document.getElementById('bulk-text').value;
-            if (!txt.trim()) return;
-
-            const lines = txt.split('\n');
-            let added = 0;
-
-            lines.forEach(l => {
-                if (!l.trim()) return;
-                const parts = l.split(/[-:|]+/);
-                if (parts.length >= 2) {
-                    const pl = parts[0].trim();
-                    const en = parts[1].trim();
-                    if (pl && en) {
-                        words.push({
-                            id: Date.now().toString() + Math.random().toString(36).substring(2, 5) + added,
-                            pl, en, desc: parts[2] ? parts[2].trim() : "",
-                            status: 'new', efactor: 2.5, repetitions: 0, interval: 0, nextReviewDate: 0
-                        });
-                        added++;
-                    }
+        function saveProgress() {
+            let progressMap = {};
+            words.forEach(w => {
+                if (w.repetitions > 0 || w.status !== 'new') {
+                    progressMap[w.id] = {
+                        status: w.status,
+                        efactor: w.efactor,
+                        repetitions: w.repetitions,
+                        interval: w.interval,
+                        nextReviewDate: w.nextReviewDate
+                    };
                 }
             });
-
-            if (added > 0) {
-                saveWords();
-                document.getElementById('bulk-text').value = "";
-                showToast(`Zaimportowano ${added} słówek!`);
-                renderWordsList();
-            } else {
-                showToast("Błędny format (użyj: polski - angielski)");
-            }
-        }
-
-        function restoreDefaultWords() {
-            showModal("Reset Słówek", "Czy na pewno chcesz przywrócić 12 przykładowych słówek?", () => {
-                words = [...sampleWords];
-                saveWords();
-                renderWordsList();
-                applyLearningSession();
-                showToast("Przywrócono przykładowe słówka!");
-            });
-        }
-
-        function deleteWord(id) {
-            showModal("Usuwanie słówka", "Czy na pewno chcesz usunąć to słówko?", () => {
-                words = words.filter(w => w.id !== id);
-                saveWords();
-                renderWordsList();
-                showToast("Słówko usunięte");
-            });
+            localStorage.setItem('fiszki_srs_data', JSON.stringify(progressMap));
+            
+            // Automatyczna synchronizacja w chmurze
+            autoPushToCloud();
         }
 
         function renderWordsList() {
@@ -1258,192 +773,49 @@
             container.innerHTML = "";
 
             const list = words.filter(w => !q || w.pl.toLowerCase().includes(q) || w.en.toLowerCase().includes(q));
-
-            if (list.length === 0) {
-                container.innerHTML = `<p style="text-align: center; font-size: 11px; color: var(--text-sub); padding: 16px;">Brak słówek w bazie</p>`;
-                return;
-            }
-
             list.forEach(w => {
                 const item = document.createElement('div');
                 item.className = 'word-item';
-                
-                let tagClass = "tag";
-                let tagTxt = "Nowe";
-                if (w.status === 'learning') { tagClass = "tag learning"; tagTxt = `Nauka (${w.interval}d)`; }
-                if (w.status === 'mastered') { tagClass = "tag mastered"; tagTxt = `Opanowane (${w.interval}d)`; }
-
                 item.innerHTML = `
-                    <div style="flex: 1; min-width: 0; padding-right: 8px;">
-                        <div style="display: flex; gap: 6px; align-items: center;">
-                            <span class="word-pl">${escapeHtml(w.pl)}</span>
-                            <span style="color: var(--text-sub); font-size: 10px;">&rarr;</span>
-                            <span class="word-en">${escapeHtml(w.en)}</span>
-                        </div>
-                        ${w.desc ? `<div class="word-sub">${escapeHtml(w.desc)}</div>` : ''}
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 6px;">
-                        <span class="${tagClass}">${tagTxt}</span>
-                        <button onclick="deleteWord('${w.id}')" style="background: none; border: none; color: var(--text-sub); font-size: 16px; cursor: pointer; padding: 2px 6px;">&times;</button>
+                    <div>
+                        <span class="word-pl">${w.pl}</span> &rarr; <span class="word-en">${w.en}</span>
+                        ${w.desc ? `<div style="font-size:10px; color:var(--text-sub);">${w.desc}</div>` : ''}
                     </div>
                 `;
                 container.appendChild(item);
             });
         }
 
-        function escapeHtml(str) {
-            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-        }
-
-        function saveWords() {
-            localStorage.setItem('fiszki_ios_v6', JSON.stringify(words));
-            if (activeCloudCode) {
-                syncPushSilently();
-            }
-        }
-
-        /* STATS LOGIC */
         function updateStatsView() {
-            loadStatsData();
-
-            const total = words.length;
-            const mastered = words.filter(w => w.status === 'mastered').length;
-            const learning = words.filter(w => w.status === 'learning').length;
-
-            document.getElementById('stat-total-val').innerText = total;
-            document.getElementById('stat-mastered-val').innerText = mastered;
-            document.getElementById('stat-today-val').innerText = statsData.todayCount;
-            document.getElementById('stat-streak-val').innerText = statsData.streak + 'd';
-
-            const mPct = total > 0 ? Math.round((mastered / total) * 100) : 0;
-            const lPct = total > 0 ? Math.round((learning / total) * 100) : 0;
-            const nPct = total > 0 ? Math.max(0, 100 - mPct - lPct) : 0;
-
-            document.getElementById('pct-mastered').innerText = mPct + '%';
-            document.getElementById('pct-learning').innerText = lPct + '%';
-            document.getElementById('pct-new').innerText = nPct + '%';
-
-            document.getElementById('bar-mastered').style.width = mPct + '%';
-            document.getElementById('bar-learning').style.width = lPct + '%';
-            document.getElementById('bar-new').style.width = nPct + '%';
+            document.getElementById('stat-total-val').innerText = words.length;
+            document.getElementById('stat-mastered-val').innerText = words.filter(w => w.status === 'mastered').length;
         }
 
-        /* SYNC & BACKUP LOGIC */
-        function updateSyncBadge() {
-            const dot = document.getElementById('status-dot');
-            const txt = document.getElementById('status-text');
-            if (activeCloudCode) {
-                dot.classList.add('active');
-                txt.innerText = activeCloudCode;
-            } else {
-                dot.classList.remove('active');
-                txt.innerText = "Lokalnie";
-            }
+        function exportProgress() {
+            const progress = localStorage.getItem('fiszki_srs_data') || '{}';
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(progress);
+            const dl = document.createElement('a');
+            dl.setAttribute("href", dataStr);
+            dl.setAttribute("download", `postep_fiszki_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(dl);
+            dl.click();
+            dl.remove();
+            showToast("Pobrano plik postępu!");
         }
 
-        function exportToFile() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(words, null, 2));
-            const dlAnchorElem = document.createElement('a');
-            dlAnchorElem.setAttribute("href", dataStr);
-            dlAnchorElem.setAttribute("download", `fiszki_backup_${new Date().toISOString().slice(0,10)}.json`);
-            document.body.appendChild(dlAnchorElem);
-            dlAnchorElem.click();
-            dlAnchorElem.remove();
-            showToast("Pobrano plik .json!");
-        }
-
-        function importFromFile(event) {
-            const fileReader = new FileReader();
-            fileReader.onload = function(e) {
+        function importProgress(e) {
+            const reader = new FileReader();
+            reader.onload = function(evt) {
                 try {
-                    const imported = JSON.parse(e.target.result);
-                    if (Array.isArray(imported)) {
-                        showModal("Wczytano plik", `Czy chcesz zastąpić słówka (${words.length}) pobraną listą (${imported.length})?`, () => {
-                            words = imported;
-                            saveWords();
-                            showToast("Zaimportowano słówka!");
-                            applyLearningSession();
-                        });
-                    } else {
-                        showToast("Błędny plik JSON.");
-                    }
+                    localStorage.setItem('fiszki_srs_data', evt.target.result);
+                    initApp();
+                    autoPushToCloud();
+                    showToast("Wczytano postęp!");
                 } catch(err) {
                     showToast("Błąd pliku.");
                 }
             };
-            if(event.target.files[0]) {
-                fileReader.readAsText(event.target.files[0]);
-            }
-        }
-
-        async function generateCloudCode() {
-            showToast("Generowanie kodu...");
-            try {
-                const res = await fetch('https://jsonblob.com/api/jsonBlob', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(words)
-                });
-                const location = res.headers.get('Location');
-                if (location) {
-                    const blobId = location.split('/').pop().substring(0, 6);
-                    activeCloudCode = blobId;
-                    localStorage.setItem('fiszki_active_code', blobId);
-                    updateSyncBadge();
-
-                    document.getElementById('sync-code-area').innerHTML = `
-                        <div style="background: var(--bg-main); padding: 10px; border-radius: 10px; text-align: center; border: 1px solid var(--accent-green);">
-                            <span style="font-size: 9px; color: var(--text-sub); font-weight: 600;">Twój aktywny kod chmury:</span>
-                            <div style="font-size: 22px; font-weight: 800; color: var(--accent-green); font-family: monospace; letter-spacing: 2px; margin: 2px 0;">${blobId}</div>
-                            <p style="font-size: 9px; color: var(--text-sub);">Wpisz ten kod na iPadzie lub iPhonie!</p>
-                        </div>
-                    `;
-                    showToast("Kod gotowy!");
-                }
-            } catch(e) {
-                showToast("Brak sieci. Użyj pliku .json.");
-            }
-        }
-
-        async function loadFromCloudCode() {
-            const code = document.getElementById('sync-code-input').value.trim();
-            if (!code) {
-                showToast("Wpisz kod!");
-                return;
-            }
-            showToast("Pobieranie...");
-            try {
-                const res = await fetch(`https://jsonblob.com/api/jsonBlob/${code}`);
-                if (res.ok) {
-                    const data = await res.json();
-                    if (Array.isArray(data)) {
-                        showModal("Zsynchronizowano", `Połączyć z chmurą i wczytać ${data.length} słówek?`, () => {
-                            words = data;
-                            activeCloudCode = code;
-                            localStorage.setItem('fiszki_active_code', code);
-                            saveWords();
-                            updateSyncBadge();
-                            showToast("Połączono z chmurą!");
-                            applyLearningSession();
-                        });
-                    }
-                } else {
-                    showToast("Nieprawidłowy kod.");
-                }
-            } catch(e) {
-                showToast("Błąd połączenia.");
-            }
-        }
-
-        async function syncPushSilently() {
-            if (!activeCloudCode) return;
-            try {
-                await fetch(`https://jsonblob.com/api/jsonBlob/${activeCloudCode}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(words)
-                });
-            } catch(e) {}
+            if(e.target.files[0]) reader.readAsText(e.target.files[0]);
         }
     </script>
 </body>
