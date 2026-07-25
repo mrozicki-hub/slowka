@@ -630,6 +630,20 @@
         <!-- TAB 3: STATS -->
         <section id="view-stats" class="hidden" style="display: flex; flex-direction: column; gap: 12px;">
             <div class="form-card">
+                <div class="form-title">Dzisiejsza Aktywność</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; text-align: center;">
+                    <div style="background-color: var(--bg-main); padding: 10px; border-radius: 10px;">
+                        <span style="font-size: 20px; font-weight: 800; color: var(--accent-blue);" id="stat-today-val">0</span>
+                        <p style="font-size: 9px; color: var(--text-sub);">Przejrzane dzisiaj</p>
+                    </div>
+                    <div style="background-color: var(--bg-main); padding: 10px; border-radius: 10px;">
+                        <span style="font-size: 20px; font-weight: 800; color: var(--accent-orange);" id="stat-streak-val">0d</span>
+                        <p style="font-size: 9px; color: var(--text-sub);">Seria dni (Streak)</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-card">
                 <div class="form-title">Podsumowanie Bazy</div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; text-align: center;">
                     <div style="background-color: var(--bg-main); padding: 10px; border-radius: 10px;">
@@ -765,6 +779,56 @@
         let cardDirection = 'PL-EN';
 
         let activeCloudCode = localStorage.getItem('fiszki_active_code') || null;
+
+        let statsData = {
+            todayCount: 0,
+            lastDate: '',
+            streak: 0
+        };
+
+        function loadStatsData() {
+            try {
+                const savedStats = localStorage.getItem('fiszki_ios_stats_v1');
+                if (savedStats) {
+                    statsData = JSON.parse(savedStats);
+                }
+            } catch(e) {}
+
+            const todayStr = new Date().toISOString().slice(0, 10);
+            if (statsData.lastDate !== todayStr) {
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                const yesterdayStr = yesterday.toISOString().slice(0, 10);
+
+                if (statsData.lastDate !== yesterdayStr && statsData.lastDate !== '') {
+                    statsData.streak = 0;
+                }
+                statsData.todayCount = 0;
+            }
+        }
+
+        function recordActivity() {
+            loadStatsData();
+            const todayStr = new Date().toISOString().slice(0, 10);
+
+            if (statsData.lastDate !== todayStr) {
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                const yesterdayStr = yesterday.toISOString().slice(0, 10);
+
+                if (statsData.lastDate === yesterdayStr) {
+                    statsData.streak += 1;
+                } else {
+                    statsData.streak = 1;
+                }
+                statsData.lastDate = todayStr;
+                statsData.todayCount = 0;
+            }
+
+            statsData.todayCount += 1;
+            localStorage.setItem('fiszki_ios_stats_v1', JSON.stringify(statsData));
+            updateStatsView();
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             setupFormEvents();
@@ -985,12 +1049,16 @@
                 if (quality < 3) {
                     rep = 0;
                     interval = 1;
-                    // Słówko zniekształcone/zapomniane wraca na koniec obecnej kolejki do przećwiczenia!
                     filteredWords.push(current);
-                } else {
+                } else if (quality === 3) {
                     if (rep === 0) interval = 1;
                     else if (rep === 1) interval = 4;
                     else interval = Math.round(interval * ef);
+                    rep++;
+                } else { // Łatwo! (quality = 5)
+                    if (rep === 0) interval = 4;
+                    else if (rep === 1) interval = 7;
+                    else interval = Math.round(interval * ef * 1.4);
                     rep++;
                 }
 
@@ -1004,9 +1072,9 @@
                 w.nextReviewDate = Date.now() + (interval * 86400000);
                 w.status = interval > 15 ? 'mastered' : 'learning';
 
+                recordActivity();
                 saveWords();
 
-                // Płynne usunięcie ocenionej karty z bieżącej listy
                 filteredWords.splice(currentIndex, 1);
                 if (filteredWords.length > 0) {
                     if (currentIndex >= filteredWords.length) {
@@ -1236,16 +1304,20 @@
 
         /* STATS LOGIC */
         function updateStatsView() {
+            loadStatsData();
+
             const total = words.length;
             const mastered = words.filter(w => w.status === 'mastered').length;
             const learning = words.filter(w => w.status === 'learning').length;
 
             document.getElementById('stat-total-val').innerText = total;
             document.getElementById('stat-mastered-val').innerText = mastered;
+            document.getElementById('stat-today-val').innerText = statsData.todayCount;
+            document.getElementById('stat-streak-val').innerText = statsData.streak + 'd';
 
             const mPct = total > 0 ? Math.round((mastered / total) * 100) : 0;
             const lPct = total > 0 ? Math.round((learning / total) * 100) : 0;
-            const nPct = total > 0 ? (100 - mPct - lPct) : 0;
+            const nPct = total > 0 ? Math.max(0, 100 - mPct - lPct) : 0;
 
             document.getElementById('pct-mastered').innerText = mPct + '%';
             document.getElementById('pct-learning').innerText = lPct + '%';
