@@ -559,7 +559,7 @@
                 <div class="controls-grid">
                     <button class="srs-btn redo" onclick="rateWord(1)">
                         <span class="srs-title">Ponów</span>
-                        <span class="srs-sub">jutro</span>
+                        <span class="srs-sub">w tej sesji</span>
                     </button>
                     <button class="srs-btn good" onclick="rateWord(3)">
                         <span class="srs-title">Dobrze</span>
@@ -746,12 +746,12 @@
 
         let words = [];
         try {
-            const saved = localStorage.getItem('fiszki_ios_v5');
+            const saved = localStorage.getItem('fiszki_ios_v6');
             if (saved && JSON.parse(saved).length > 0) {
                 words = JSON.parse(saved);
             } else {
                 words = [...sampleWords];
-                localStorage.setItem('fiszki_ios_v5', JSON.stringify(words));
+                localStorage.setItem('fiszki_ios_v6', JSON.stringify(words));
             }
         } catch(e) {
             words = [...sampleWords];
@@ -857,7 +857,7 @@
             renderCard();
         }
 
-        function applyLearningSession() {
+        function updateCounters() {
             const now = Date.now();
             const due = words.filter(w => w.nextReviewDate <= now && w.repetitions > 0);
             const newWords = words.filter(w => w.repetitions === 0);
@@ -866,10 +866,19 @@
             document.getElementById('count-due').innerText = due.length;
             document.getElementById('count-new').innerText = newWords.length;
             document.getElementById('count-future').innerText = future.length;
+        }
 
-            if (activeFilter === 'due') filteredWords = due;
-            else if (activeFilter === 'new') filteredWords = newWords;
-            else if (activeFilter === 'future') filteredWords = future;
+        function applyLearningSession() {
+            const now = Date.now();
+            const due = words.filter(w => w.nextReviewDate <= now && w.repetitions > 0);
+            const newWords = words.filter(w => w.repetitions === 0);
+            const future = words.filter(w => w.nextReviewDate > now && w.repetitions > 0);
+
+            updateCounters();
+
+            if (activeFilter === 'due') filteredWords = [...due];
+            else if (activeFilter === 'new') filteredWords = [...newWords];
+            else if (activeFilter === 'future') filteredWords = [...future];
             else filteredWords = [...due, ...newWords, ...future];
 
             currentIndex = 0;
@@ -896,11 +905,15 @@
 
             if (filteredWords.length === 0) {
                 document.getElementById('front-text').innerText = "Koniec fiszek!";
-                document.getElementById('front-desc').innerText = "Brak słówek w tym filtrze.";
+                document.getElementById('front-desc').innerText = "Świetna robota! Pula pusta.";
                 document.getElementById('back-text').innerText = "Brawo!";
                 document.getElementById('back-desc').innerText = "";
                 counterEl.innerText = "0 / 0";
                 return;
+            }
+
+            if (currentIndex >= filteredWords.length) {
+                currentIndex = 0;
             }
 
             counterEl.innerText = `${currentIndex + 1} / ${filteredWords.length}`;
@@ -972,6 +985,8 @@
                 if (quality < 3) {
                     rep = 0;
                     interval = 1;
+                    // Słówko zniekształcone/zapomniane wraca na koniec obecnej kolejki do przećwiczenia!
+                    filteredWords.push(current);
                 } else {
                     if (rep === 0) interval = 1;
                     else if (rep === 1) interval = 4;
@@ -990,8 +1005,18 @@
                 w.status = interval > 15 ? 'mastered' : 'learning';
 
                 saveWords();
-                showToast(`Zapisano! Powtórka za: ${interval}d`);
-                applyLearningSession();
+
+                // Płynne usunięcie ocenionej karty z bieżącej listy
+                filteredWords.splice(currentIndex, 1);
+                if (filteredWords.length > 0) {
+                    if (currentIndex >= filteredWords.length) {
+                        currentIndex = 0;
+                    }
+                }
+
+                updateCounters();
+                renderCurrentMode();
+                showToast(quality < 3 ? "Słówko wróci na koniec powtórki" : `Zapisano! Powtórka za: ${interval}d`);
             }
         }
 
@@ -1004,6 +1029,8 @@
                 document.getElementById('quiz-question-text').innerText = "Brak słówek!";
                 return;
             }
+
+            if (currentIndex >= filteredWords.length) currentIndex = 0;
 
             const current = filteredWords[currentIndex];
             document.getElementById('quiz-question-text').innerText = current.pl;
@@ -1201,7 +1228,7 @@
         }
 
         function saveWords() {
-            localStorage.setItem('fiszki_ios_v5', JSON.stringify(words));
+            localStorage.setItem('fiszki_ios_v6', JSON.stringify(words));
             if (activeCloudCode) {
                 syncPushSilently();
             }
