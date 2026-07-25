@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Fiszki Pro iOS</title>
-    <!-- Ładowanie bazy słówek z pliku words.js -->
+    <title>Fiszki Pro GitHub Edition</title>
+    <!-- Ładowanie danych wyłącznie z Twojego repozytorium na GitHubie -->
     <script src="words.js"></script>
+    <script src="progress.js"></script>
     <style>
         :root {
             --bg-main: #000000;
@@ -72,27 +73,23 @@
             color: var(--text-sub);
         }
 
-        .cloud-badge {
+        .status-badge {
             background-color: var(--bg-card);
             border: 1px solid var(--border-color);
             padding: 6px 10px;
             border-radius: 20px;
             font-size: 10px;
             font-weight: 600;
-            color: var(--text-sub);
+            color: var(--accent-green);
             display: flex;
             align-items: center;
             gap: 6px;
         }
 
-        .cloud-dot {
+        .status-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background-color: var(--accent-orange);
-        }
-
-        .cloud-dot.synced {
             background-color: var(--accent-green);
         }
 
@@ -271,11 +268,11 @@
         <header>
             <div>
                 <h1 class="brand-title">Fiszki Pro</h1>
-                <p class="brand-sub">Auto-Sync z Chmurą</p>
+                <p class="brand-sub">GitHub Storage System</p>
             </div>
-            <div class="cloud-badge">
-                <span class="cloud-dot" id="cloud-dot"></span>
-                <span id="cloud-status-text">Lokalnie</span>
+            <div class="status-badge">
+                <span class="status-dot"></span>
+                <span>GitHub Repository</span>
             </div>
         </header>
 
@@ -337,7 +334,7 @@
                     <button class="btn-secondary" onclick="nextCard()" style="padding: 6px 12px; font-size: 11px;">Następna &rarr;</button>
                 </div>
 
-                <!-- DOKŁADNIE 5 PRZYCISKÓW (DOBRZE = 10d) -->
+                <!-- 5 PRZYCISKÓW OCENY -->
                 <div class="controls-grid">
                     <button class="srs-btn redo" onclick="rateWord('redo')">
                         <span class="srs-title">Ponów</span>
@@ -379,7 +376,7 @@
             <div class="form-card">
                 <div class="form-title">➕ Dodaj nowe słówka (Generator `words.js`)</div>
                 <p style="font-size: 11px; color: var(--text-sub); line-height: 1.3;">
-                    Wklej tutaj słówka raz w miesiącu, skopiuj wygenerowany kod i wklej do pliku <code style="color:var(--accent-blue)">words.js</code> na GitHubie!
+                    Wklej tutaj słówka raz w miesiącu, skopiuj wygenerowany kod i podmień plik <code style="color:var(--accent-blue)">words.js</code> na GitHubie!
                 </p>
                 <textarea id="bulk-input" rows="4" placeholder="pies - dog&#10;kot - cat | zwierzę domowe&#10;metykulatywny - meticulous" style="background:var(--bg-main); border:1px solid var(--border-color); color:#fff; padding:10px; border-radius:10px; font-size:12px; font-family:monospace;"></textarea>
                 <button class="btn-primary" onclick="generateWordsJsCode()">Wygeneruj kod dla words.js</button>
@@ -394,7 +391,7 @@
             <div class="form-card" style="border-color: var(--accent-gold);">
                 <div class="form-title" style="color: var(--accent-gold);">🎓 Wyczyszczony `words.js` (Bez opanowanych słówek)</div>
                 <p style="font-size: 11px; color: var(--text-sub); line-height: 1.3;">
-                    Pobierz wersję `words.js` pozbawioną słówek, które zostały trwale opanowane (po ponownym kliknięciu "Wiem" dla słówka ze statusem 180 dni).
+                    Pobierz wersję `words.js` pozbawioną słówek, które zostały trwale opanowane (po ponownym kliknięciu "Wiem" po 180 dniach).
                 </p>
                 <button class="btn-secondary" onclick="generateCleanWordsJs()">Wygeneruj wyczyszczony words.js</button>
             </div>
@@ -438,32 +435,33 @@
             </div>
         </section>
 
-        <!-- TAB 4: SYNC & CLOUD -->
+        <!-- TAB 4: GITHUB SYNC -->
         <section id="view-sync" class="hidden" style="display: flex; flex-direction: column; gap: 12px;">
-            <div class="form-card">
-                <div class="form-title">1. Automatyczny Zapis w Chmurze</div>
-                <p style="font-size: 11px; color: var(--text-sub); line-height: 1.3;">
-                    Ustaw swój unikalny klucz. Postęp powtórek zapisuje się w chmurze przy każdej ocenionej fiszce.
+            <div class="form-card" style="border-color: var(--accent-blue);">
+                <div class="form-title" style="color: var(--accent-blue);">1. Zapis Postępu na GitHubie (Plik `progress.js`)</div>
+                <p style="font-size: 11px; color: var(--text-sub); line-height: 1.4;">
+                    Wygeneruj kod z historią nauki i wklej go do pliku <code style="color:var(--accent-blue)">progress.js</code> w swoim repozytorium GitHub.
                 </p>
-                <div style="display: flex; gap: 6px; margin-top: 4px;">
-                    <input type="text" id="cloud-key-input" placeholder="Wpisz Twój klucz..." style="background:var(--bg-main); border:1px solid var(--border-color); color:#fff; padding:10px; border-radius:10px; font-size:12px; flex:1;">
-                    <button class="btn-primary" style="padding:10px 14px;" onclick="setCloudKey()">Zapisz Klucz</button>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 4px;">
-                    <button class="btn-secondary" onclick="testCloudConnection()">Przetestuj połączenie</button>
-                    <button class="btn-secondary" onclick="forceCloudPull()">Pobierz z chmury</button>
-                </div>
-                <div id="cloud-test-result" style="font-size: 11px; display: none; padding: 8px; border-radius: 8px; text-align: center;"></div>
+                <button class="btn-primary" style="background:var(--accent-blue); color:#fff;" onclick="generateProgressJsCode()">Wygeneruj kod dla progress.js</button>
             </div>
 
             <div class="form-card">
-                <div class="form-title">2. Kopia Zapasowa do Pliku (iCloud Drive)</div>
+                <div class="form-title">2. Direct GitHub API Sync (Zapis 1-kliknięciem)</div>
                 <p style="font-size: 11px; color: var(--text-sub); line-height: 1.3;">
-                    Zapisz plik z całą historią SRS bezpośrednio na dysk / iCloud.
+                    Podaj swój Token z GitHuba, aby aplikacja sama aktualizowała plik <code style="color:var(--accent-blue)">progress.js</code> na Twoim koncie.
                 </p>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 4px;">
+                <input type="text" id="gh-user" placeholder="GitHub Username (np. jan-kowalski)" style="background:var(--bg-main); border:1px solid var(--border-color); color:#fff; padding:8px; border-radius:8px; font-size:11px;">
+                <input type="text" id="gh-repo" placeholder="Nazwa Repozytorium (np. fiszki-pro)" style="background:var(--bg-main); border:1px solid var(--border-color); color:#fff; padding:8px; border-radius:8px; font-size:11px;">
+                <input type="password" id="gh-token" placeholder="GitHub Token (PAT)" style="background:var(--bg-main); border:1px solid var(--border-color); color:#fff; padding:8px; border-radius:8px; font-size:11px;">
+                <button class="btn-secondary" onclick="saveGitHubApiSettings()">Zapisz dane połączenia</button>
+                <button class="btn-primary" onclick="pushProgressToGitHubApi()">Zapisz bezpośrednio na GitHub</button>
+            </div>
+
+            <div class="form-card">
+                <div class="form-title">3. Kopia Zapasowa do Pliku (.json / iCloud)</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                     <button class="btn-secondary" onclick="exportProgress()">Pobierz (.json)</button>
-                    <label class="btn-secondary" style="text-align: center; cursor: pointer;">
+                    <label class="btn-secondary" style="text-align: center; cursor: pointer; display:flex; align-items:center; justify-content:center;">
                         Wgraj plik
                         <input type="file" accept=".json" onchange="importProgress(event)" style="display: none;">
                     </label>
@@ -488,7 +486,7 @@
         </button>
         <button class="nav-item" id="nav-sync" onclick="switchNav('sync')">
             <svg class="nav-icon" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM19 18H6c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95C8.08 7.14 9.94 6 12 6c2.62 0 4.88 1.86 5.39 4.43l.3 1.5 1.53.11c1.56.1 2.78 1.41 2.78 2.96 0 1.65-1.35 3-3 3z"/></svg>
-            Chmura
+            Kopia / GitHub
         </button>
     </nav>
 
@@ -502,33 +500,28 @@
         let activeFilter = 'all';
         let currentLearnMode = 'flashcards';
         let cardDirection = 'PL-EN';
-        let userCloudKey = localStorage.getItem('fiszki_cloud_key') || '';
 
         document.addEventListener('DOMContentLoaded', () => {
             initApp();
             setupTouchGestures();
-            if (userCloudKey) {
-                document.getElementById('cloud-key-input').value = userCloudKey;
-                autoPullFromCloud();
-            }
+            loadGitHubApiSettings();
         });
 
-        function getCloudEndpoint() {
-            if (!userCloudKey) return null;
-            const safeKey = encodeURIComponent(userCloudKey.toLowerCase().trim());
-            return `https://keyvalue.imkey.store/api/v1/items/${safeKey}`;
-        }
-
-        async function initApp() {
+        function initApp() {
             const rawList = window.myVocabularyList || [];
-            let savedProgress = {};
+            
+            // Łączenie postępu z pliku progress.js na GitHubie oraz z pamięci podręcznej
+            const githubProgress = window.myProgressData || {};
+            let localProgress = {};
             try {
-                savedProgress = JSON.parse(localStorage.getItem('fiszki_srs_data')) || {};
+                localProgress = JSON.parse(localStorage.getItem('fiszki_srs_data')) || {};
             } catch(e) {}
+
+            const mergedProgress = { ...githubProgress, ...localProgress };
 
             words = rawList.map((item) => {
                 const id = "w_" + btoa(unescape(encodeURIComponent(item.pl + "_" + item.en)));
-                const srs = savedProgress[id] || {};
+                const srs = mergedProgress[id] || {};
                 return {
                     id: id,
                     pl: item.pl,
@@ -542,107 +535,6 @@
 
             applyLearningSession();
             updateStatsView();
-            updateCloudBadgeStatus();
-        }
-
-        function updateCloudBadgeStatus() {
-            const dot = document.getElementById('cloud-dot');
-            const txt = document.getElementById('cloud-status-text');
-            if (userCloudKey) {
-                dot.classList.add('synced');
-                txt.innerText = userCloudKey;
-            } else {
-                dot.classList.remove('synced');
-                txt.innerText = "Lokalnie";
-            }
-        }
-
-        function setCloudKey() {
-            const val = document.getElementById('cloud-key-input').value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
-            if (!val) {
-                showToast("Wpisz prawidłowy klucz!");
-                return;
-            }
-            userCloudKey = val;
-            localStorage.setItem('fiszki_cloud_key', userCloudKey);
-            updateCloudBadgeStatus();
-            showToast("Zapisano klucz chmury!");
-            forceCloudPull();
-        }
-
-        async function testCloudConnection() {
-            if (!userCloudKey) {
-                showToast("Wpisz i zapisz klucz!");
-                return;
-            }
-            const resBox = document.getElementById('cloud-test-result');
-            resBox.style.display = "block";
-            resBox.style.background = "rgba(10, 132, 255, 0.15)";
-            resBox.style.color = "var(--accent-blue)";
-            resBox.innerText = "Testowanie połączenia z chmurą...";
-
-            try {
-                const endpoint = getCloudEndpoint();
-                const testPayload = JSON.stringify({ test: true, time: Date.now() });
-
-                const pushRes = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain' },
-                    body: testPayload
-                });
-
-                if (pushRes.ok) {
-                    const getRes = await fetch(endpoint);
-                    if (getRes.ok) {
-                        resBox.style.background = "rgba(48, 209, 88, 0.15)";
-                        resBox.style.color = "var(--accent-green)";
-                        resBox.innerText = `✅ Sukces! Chmura połączona dla klucza: "${userCloudKey}"`;
-                        autoPushToCloud();
-                        return;
-                    }
-                }
-                throw new Error("Błąd sieci");
-            } catch(e) {
-                resBox.style.background = "rgba(255, 69, 58, 0.15)";
-                resBox.style.color = "var(--accent-red)";
-                resBox.innerText = "❌ Brak połączenia z serwerem chmury.";
-            }
-        }
-
-        async function autoPullFromCloud() {
-            const endpoint = getCloudEndpoint();
-            if (!endpoint) return;
-            try {
-                const res = await fetch(endpoint);
-                if (res.ok) {
-                    const cloudText = await res.text();
-                    const cloudSrs = JSON.parse(cloudText);
-                    if (cloudSrs && typeof cloudSrs === 'object') {
-                        localStorage.setItem('fiszki_srs_data', JSON.stringify(cloudSrs));
-                        initApp();
-                        showToast("Pobrano postęp z chmury!");
-                    }
-                }
-            } catch(e) {}
-        }
-
-        async function autoPushToCloud() {
-            const endpoint = getCloudEndpoint();
-            if (!endpoint) return;
-            try {
-                const progress = localStorage.getItem('fiszki_srs_data') || '{}';
-                await fetch(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain' },
-                    body: progress
-                });
-                updateCloudBadgeStatus();
-            } catch(e) {}
-        }
-
-        function forceCloudPull() {
-            if (!userCloudKey) { showToast("Ustaw najpierw klucz!"); return; }
-            autoPullFromCloud();
         }
 
         function showToast(msg) {
@@ -774,7 +666,7 @@
             renderCard();
         }
 
-        /* USTAWIENIA INTERWAŁÓW (DOBRZE = 10 DNI) */
+        /* 5 SZTYWNYCH INTERWAŁÓW OCENY */
         function rateWord(level) {
             if (filteredWords.length === 0) return;
             const current = filteredWords[currentIndex];
@@ -786,7 +678,7 @@
                 let toastMsg = "";
 
                 if (level === 'redo') {
-                    // Ponów: OD RAZU (w tej samej sesji na koniec, bez dodawania dni)
+                    // Ponów: OD RAZU (w tej samej sesji na koniec)
                     w.interval = 0;
                     w.status = 'new';
                     w.nextReviewDate = Date.now();
@@ -796,25 +688,25 @@
                     toastMsg = "Ponawiamy dzisiaj na końcu!";
                 } else {
                     if (level === 'almost') {
-                        interval = 1; // Prawie -> powtórka za 1 dzień (jutro)
+                        interval = 1; // Prawie -> za 1 dzień
                         w.status = '1d';
                         toastMsg = "Powtórka za 1 dzień (jutro)";
                     } else if (level === 'good') {
-                        interval = 10; // Dobrze -> POWTÓRKA ZA 10 DNI!
+                        interval = 10; // Dobrze -> ZA 10 DNI!
                         w.status = '10d';
                         toastMsg = "Powtórka za 10 dni";
                     } else if (level === 'easy') {
-                        interval = 30; // Łatwo -> powtórka za 30 dni (za miesiąc)
+                        interval = 30; // Łatwo -> za 30 dni
                         w.status = '30d';
                         toastMsg = "Powtórka za 30 dni";
                     } else if (level === 'know') {
                         if (w.status === '180d' || w.interval === 180) {
-                            // Drugi raz Wiem pod rzędu po 180 dniach -> Opanowane do usunięcia!
+                            // Drugi raz Wiem po 180 dniach -> Opanowane na zawsze
                             interval = 9999;
                             w.status = 'graduated';
                             toastMsg = "🎓 Opanowane! Trafia do usunięcia z words.js";
                         } else {
-                            interval = 180; // Wiem pierwszy raz -> powtórka za 6 miesięcy
+                            interval = 180; // Wiem pierwszy raz -> za 6 miesięcy
                             w.status = '180d';
                             toastMsg = "Powtórka za 6 miesięcy (180d)";
                         }
@@ -874,7 +766,7 @@
             });
         }
 
-        function saveProgress() {
+        function getProgressMap() {
             let progressMap = {};
             words.forEach(w => {
                 if (w.interval > 0 || w.status !== 'new') {
@@ -885,8 +777,88 @@
                     };
                 }
             });
+            return progressMap;
+        }
+
+        function saveProgress() {
+            const progressMap = getProgressMap();
             localStorage.setItem('fiszki_srs_data', JSON.stringify(progressMap));
-            autoPushToCloud();
+        }
+
+        /* GENERATOR PROGRESS.JS DLA GITHUBA */
+        function generateProgressJsCode() {
+            const progressMap = getProgressMap();
+            const code = `window.myProgressData = ${JSON.stringify(progressMap, null, 2)};`;
+
+            document.getElementById('generated-code-text').value = code;
+            document.getElementById('generated-code-box').classList.remove('hidden');
+            switchNav('words');
+            showToast("Wygenerowano kod dla progress.js!");
+        }
+
+        /* GITHUB DIRECT API SYNC */
+        function saveGitHubApiSettings() {
+            localStorage.setItem('gh_user', document.getElementById('gh-user').value.trim());
+            localStorage.setItem('gh_repo', document.getElementById('gh-repo').value.trim());
+            localStorage.setItem('gh_token', document.getElementById('gh-token').value.trim());
+            showToast("Zapisano dane połączenia GitHub!");
+        }
+
+        function loadGitHubApiSettings() {
+            document.getElementById('gh-user').value = localStorage.getItem('gh_user') || '';
+            document.getElementById('gh-repo').value = localStorage.getItem('gh_repo') || '';
+            document.getElementById('gh-token').value = localStorage.getItem('gh_token') || '';
+        }
+
+        async function pushProgressToGitHubApi() {
+            const user = document.getElementById('gh-user').value.trim();
+            const repo = document.getElementById('gh-repo').value.trim();
+            const token = document.getElementById('gh-token').value.trim();
+
+            if (!user || !repo || !token) {
+                showToast("Wypełnij User, Repo i Token!");
+                return;
+            }
+
+            showToast("Wysyłanie na GitHub...");
+            const url = `https://api.github.com/repos/${user}/${repo}/contents/progress.js`;
+            const progressMap = getProgressMap();
+            const content = `window.myProgressData = ${JSON.stringify(progressMap, null, 2)};`;
+            const encodedContent = btoa(unescape(encodeURIComponent(content)));
+
+            try {
+                // Pobranie SHA istniejącego pliku progress.js
+                let sha = "";
+                const getRes = await fetch(url, {
+                    headers: { 'Authorization': `token ${token}` }
+                });
+                if (getRes.ok) {
+                    const fileData = await getRes.json();
+                    sha = fileData.sha;
+                }
+
+                // Aktualizacja / Utworzenie progress.js na GitHubie
+                const putRes = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: `Auto-update progress.js: ${new Date().toLocaleString()}`,
+                        content: encodedContent,
+                        sha: sha || undefined
+                    })
+                });
+
+                if (putRes.ok) {
+                    showToast("✅ Zapisano bezpośrednio w progress.js na GitHubie!");
+                } else {
+                    showToast("❌ Błąd zapisu na GitHub. Sprawdź Token!");
+                }
+            } catch(e) {
+                showToast("❌ Błąd połączenia z API GitHuba.");
+            }
         }
 
         /* GENERATOR NOWYCH SŁÓWEK DO WORDS.JS */
@@ -964,7 +936,7 @@
             });
         }
 
-        /* SZCZEGÓŁOWE STATYSTYKI W 6 KATEGORIACH (Z DOBRZE = 10D) */
+        /* SZCZEGÓŁOWE STATYSTYKI W 6 KATEGORIACH */
         function updateStatsView() {
             const cNew = words.filter(w => w.status === 'new' || w.interval === 0).length;
             const c1d = words.filter(w => w.status === '1d').length;
@@ -999,7 +971,6 @@
                 try {
                     localStorage.setItem('fiszki_srs_data', evt.target.result);
                     initApp();
-                    autoPushToCloud();
                     showToast("Wczytano postęp!");
                 } catch(err) {
                     showToast("Błąd pliku.");
