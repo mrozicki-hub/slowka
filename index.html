@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Fiszki Pro iOS</title>
+    <!-- Ładowanie bazy słówek z pliku words.js -->
     <script src="words.js"></script>
     <style>
         :root {
@@ -17,8 +18,10 @@
             --accent-green: #30d158;
             --accent-orange: #ff9f0a;
             --accent-red: #ff453a;
+            --accent-purple: #af52de;
+            --accent-gold: #ffd60a;
             --radius-main: 20px;
-            --radius-btn: 14px;
+            --radius-btn: 12px;
         }
 
         * {
@@ -139,7 +142,7 @@
             perspective: 1000px;
             -webkit-perspective: 1000px;
             width: 100%;
-            height: 220px;
+            height: 210px;
             margin: auto 0;
             cursor: pointer;
         }
@@ -186,14 +189,35 @@
         .card-desc { font-size: 12px; color: var(--text-sub); font-style: italic; margin-top: 4px; }
         .card-hint { font-size: 10px; color: var(--text-sub); }
 
-        .controls-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
-        .srs-btn { background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 10px 4px; border-radius: var(--radius-btn); display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; }
+        .controls-grid { 
+            display: grid; 
+            grid-template-columns: repeat(5, 1fr); 
+            gap: 4px; 
+            margin-top: 12px; 
+        }
+
+        .srs-btn { 
+            background-color: var(--bg-card); 
+            border: 1px solid var(--border-color); 
+            padding: 8px 2px; 
+            border-radius: var(--radius-btn); 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 2px; 
+            cursor: pointer; 
+        }
+
+        .srs-btn:active { transform: scale(0.95); }
+
         .srs-btn.redo { border-color: rgba(255, 69, 58, 0.4); color: var(--accent-red); }
+        .srs-btn.almost { border-color: rgba(255, 159, 10, 0.4); color: var(--accent-orange); }
         .srs-btn.good { border-color: rgba(10, 132, 255, 0.4); color: var(--accent-blue); }
         .srs-btn.easy { border-color: rgba(48, 209, 88, 0.4); color: var(--accent-green); }
+        .srs-btn.know { border-color: rgba(175, 82, 222, 0.4); color: var(--accent-purple); }
 
-        .srs-title { font-size: 12px; font-weight: 700; }
-        .srs-sub { font-size: 9px; color: var(--text-sub); }
+        .srs-title { font-size: 11px; font-weight: 700; white-space: nowrap; }
+        .srs-sub { font-size: 8px; color: var(--text-sub); white-space: nowrap; }
 
         .quiz-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 16px; margin: auto 0; }
         .quiz-options { display: grid; grid-template-columns: 1fr; gap: 8px; }
@@ -206,6 +230,25 @@
 
         .btn-primary { background-color: var(--accent-green); color: #000; font-weight: 700; font-size: 13px; padding: 12px; border: none; border-radius: 10px; cursor: pointer; text-align: center; }
         .btn-secondary { background-color: var(--bg-card-secondary); color: var(--text-main); font-weight: 600; font-size: 12px; padding: 10px; border: 1px solid var(--border-color); border-radius: 10px; cursor: pointer; text-align: center; }
+
+        .stat-grid-6 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .stat-box {
+            background-color: var(--bg-main);
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .stat-box-val { font-size: 18px; font-weight: 800; }
+        .stat-box-lbl { font-size: 10px; color: var(--text-sub); font-weight: 600; margin-top: 2px; }
 
         .word-item { background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 12px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
         .word-pl { font-weight: 700; font-size: 13px; color: var(--text-main); }
@@ -294,18 +337,27 @@
                     <button class="btn-secondary" onclick="nextCard()" style="padding: 6px 12px; font-size: 11px;">Następna &rarr;</button>
                 </div>
 
+                <!-- DOKŁADNIE 5 PRZYCISKÓW (DOBRZE = 10d) -->
                 <div class="controls-grid">
-                    <button class="srs-btn redo" onclick="rateWord(1)">
+                    <button class="srs-btn redo" onclick="rateWord('redo')">
                         <span class="srs-title">Ponów</span>
-                        <span class="srs-sub">na koniec</span>
+                        <span class="srs-sub">od razu</span>
                     </button>
-                    <button class="srs-btn good" onclick="rateWord(3)">
+                    <button class="srs-btn almost" onclick="rateWord('almost')">
+                        <span class="srs-title">Prawie</span>
+                        <span class="srs-sub">za 1d</span>
+                    </button>
+                    <button class="srs-btn good" onclick="rateWord('good')">
                         <span class="srs-title">Dobrze</span>
-                        <span class="srs-sub" id="lbl-good">za 4 dni</span>
+                        <span class="srs-sub">za 10d</span>
                     </button>
-                    <button class="srs-btn easy" onclick="rateWord(5)">
-                        <span class="srs-title">Łatwo!</span>
-                        <span class="srs-sub" id="lbl-easy">za 7 dni</span>
+                    <button class="srs-btn easy" onclick="rateWord('easy')">
+                        <span class="srs-title">Łatwo</span>
+                        <span class="srs-sub">za 30d</span>
+                    </button>
+                    <button class="srs-btn know" onclick="rateWord('know')">
+                        <span class="srs-title">Wiem</span>
+                        <span class="srs-sub">za 180d</span>
                     </button>
                 </div>
             </div>
@@ -322,33 +374,65 @@
             </div>
         </section>
 
-        <!-- TAB 2: WORDS -->
-        <section id="view-words" class="hidden">
+        <!-- TAB 2: WORDS & GENERATOR -->
+        <section id="view-words" class="hidden" style="display: flex; flex-direction: column; gap: 12px;">
             <div class="form-card">
-                <div class="form-title">Źródło słówek: words.js</div>
-                <p style="font-size: 11px; color: var(--text-sub); line-height: 1.4;">
-                    Słówka są automatycznie wczytywane z pliku <code style="color:var(--accent-blue)">words.js</code>. Dodawaj nowe słówka na GitHubie kiedy chcesz &ndash; Twój postęp nauki pozostaje bezpieczny w chmurze!
+                <div class="form-title">➕ Dodaj nowe słówka (Generator `words.js`)</div>
+                <p style="font-size: 11px; color: var(--text-sub); line-height: 1.3;">
+                    Wklej tutaj słówka raz w miesiącu, skopiuj wygenerowany kod i wklej do pliku <code style="color:var(--accent-blue)">words.js</code> na GitHubie!
                 </p>
-                <button class="btn-secondary" onclick="reloadFromWordsJs()">Odśwież słówka z words.js</button>
+                <textarea id="bulk-input" rows="4" placeholder="pies - dog&#10;kot - cat | zwierzę domowe&#10;metykulatywny - meticulous" style="background:var(--bg-main); border:1px solid var(--border-color); color:#fff; padding:10px; border-radius:10px; font-size:12px; font-family:monospace;"></textarea>
+                <button class="btn-primary" onclick="generateWordsJsCode()">Wygeneruj kod dla words.js</button>
             </div>
-            <div style="margin-top: 12px;">
-                <input type="text" id="search-bar" oninput="renderWordsList()" placeholder="Szukaj słówka..." style="background:var(--bg-card); border:1px solid var(--border-color); color:#fff; padding:10px; border-radius:10px; width:100%; font-size:12px;">
+
+            <div id="generated-code-box" class="form-card hidden" style="border-color: var(--accent-green);">
+                <div class="form-title" style="color: var(--accent-green);">✅ Twój wygenerowany kod JavaScript:</div>
+                <textarea id="generated-code-text" rows="5" readonly style="background:var(--bg-main); border:1px solid var(--border-color); color:#fff; padding:10px; border-radius:10px; font-size:11px; font-family:monospace;"></textarea>
+                <button class="btn-secondary" onclick="copyGeneratedCode()">Kopiuj kod do schowka</button>
             </div>
-            <div id="words-list-container" style="margin-top: 10px;"></div>
+
+            <div class="form-card" style="border-color: var(--accent-gold);">
+                <div class="form-title" style="color: var(--accent-gold);">🎓 Wyczyszczony `words.js` (Bez opanowanych słówek)</div>
+                <p style="font-size: 11px; color: var(--text-sub); line-height: 1.3;">
+                    Pobierz wersję `words.js` pozbawioną słówek, które zostały trwale opanowane (po ponownym kliknięciu "Wiem" dla słówka ze statusem 180 dni).
+                </p>
+                <button class="btn-secondary" onclick="generateCleanWordsJs()">Wygeneruj wyczyszczony words.js</button>
+            </div>
+
+            <div style="margin-top: 4px;">
+                <input type="text" id="search-bar" oninput="renderWordsList()" placeholder="Szukaj słówka w bazie..." style="background:var(--bg-card); border:1px solid var(--border-color); color:#fff; padding:10px; border-radius:10px; width:100%; font-size:12px;">
+            </div>
+            <div id="words-list-container"></div>
         </section>
 
         <!-- TAB 3: STATS -->
         <section id="view-stats" class="hidden" style="display: flex; flex-direction: column; gap: 12px;">
             <div class="form-card">
-                <div class="form-title">Twój Postęp</div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; text-align: center;">
-                    <div style="background-color: var(--bg-main); padding: 10px; border-radius: 10px;">
-                        <span style="font-size: 20px; font-weight: 800; color: #fff;" id="stat-total-val">0</span>
-                        <p style="font-size: 9px; color: var(--text-sub);">Wszystkich słówek</p>
+                <div class="form-title">Szczegółowy Rozkład Pamięci (6 Kategori)</div>
+                <div class="stat-grid-6">
+                    <div class="stat-box">
+                        <span class="stat-box-val" style="color:var(--text-sub)" id="st-new">0</span>
+                        <span class="stat-box-lbl">Nowe (0d)</span>
                     </div>
-                    <div style="background-color: var(--bg-main); padding: 10px; border-radius: 10px;">
-                        <span style="font-size: 20px; font-weight: 800; color: var(--accent-green);" id="stat-mastered-val">0</span>
-                        <p style="font-size: 9px; color: var(--text-sub);">Opanowanych (&gt;15d)</p>
+                    <div class="stat-box">
+                        <span class="stat-box-val" style="color:var(--accent-orange)" id="st-1d">0</span>
+                        <span class="stat-box-lbl">Prawie (1d)</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-box-val" style="color:var(--accent-blue)" id="st-10d">0</span>
+                        <span class="stat-box-lbl">Dobrze (10d)</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-box-val" style="color:var(--accent-green)" id="st-30d">0</span>
+                        <span class="stat-box-lbl">Łatwo (30d)</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-box-val" style="color:var(--accent-purple)" id="st-180d">0</span>
+                        <span class="stat-box-lbl">Wiem (180d)</span>
+                    </div>
+                    <div class="stat-box" style="border-color: var(--accent-gold);">
+                        <span class="stat-box-val" style="color:var(--accent-gold)" id="st-grad">0</span>
+                        <span class="stat-box-lbl">🎓 Do usunięcia</span>
                     </div>
                 </div>
             </div>
@@ -359,22 +443,23 @@
             <div class="form-card">
                 <div class="form-title">1. Automatyczny Zapis w Chmurze</div>
                 <p style="font-size: 11px; color: var(--text-sub); line-height: 1.3;">
-                    Ustaw swój unikalny klucz (np. <code style="color:var(--accent-blue)">maciek-cae-2026</code>). Postęp powtórek będzie się zapisywał automatycznie w chmurze przy każdej ocenionej fiszce!
+                    Ustaw swój unikalny klucz. Postęp powtórek zapisuje się w chmurze przy każdej ocenionej fiszce.
                 </p>
                 <div style="display: flex; gap: 6px; margin-top: 4px;">
                     <input type="text" id="cloud-key-input" placeholder="Wpisz Twój klucz..." style="background:var(--bg-main); border:1px solid var(--border-color); color:#fff; padding:10px; border-radius:10px; font-size:12px; flex:1;">
                     <button class="btn-primary" style="padding:10px 14px;" onclick="setCloudKey()">Zapisz Klucz</button>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 4px;">
-                    <button class="btn-secondary" onclick="forceCloudPush()">Pchnij do chmury</button>
+                    <button class="btn-secondary" onclick="testCloudConnection()">Przetestuj połączenie</button>
                     <button class="btn-secondary" onclick="forceCloudPull()">Pobierz z chmury</button>
                 </div>
+                <div id="cloud-test-result" style="font-size: 11px; display: none; padding: 8px; border-radius: 8px; text-align: center;"></div>
             </div>
 
             <div class="form-card">
                 <div class="form-title">2. Kopia Zapasowa do Pliku (iCloud Drive)</div>
                 <p style="font-size: 11px; color: var(--text-sub); line-height: 1.3;">
-                    Żelazny zapas: w dowolnym momencie możesz zapisać plik z całą historią SRS bezpośrednio na iCloud Drive.
+                    Zapisz plik z całą historią SRS bezpośrednio na dysk / iCloud.
                 </p>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 4px;">
                     <button class="btn-secondary" onclick="exportProgress()">Pobierz (.json)</button>
@@ -428,12 +513,14 @@
             }
         });
 
-        async function initApp() {
-            const rawList = window.myVocabularyList || [
-                { pl: "Cześć", en: "Hello", desc: "Podstawowe przywitanie" },
-                { pl: "Dziękuję", en: "Thank you", desc: "Wyraz wdzięczności" }
-            ];
+        function getCloudEndpoint() {
+            if (!userCloudKey) return null;
+            const safeKey = encodeURIComponent(userCloudKey.toLowerCase().trim());
+            return `https://keyvalue.imkey.store/api/v1/items/${safeKey}`;
+        }
 
+        async function initApp() {
+            const rawList = window.myVocabularyList || [];
             let savedProgress = {};
             try {
                 savedProgress = JSON.parse(localStorage.getItem('fiszki_srs_data')) || {};
@@ -447,9 +534,7 @@
                     pl: item.pl,
                     en: item.en,
                     desc: item.desc || "",
-                    status: srs.status || 'new',
-                    efactor: srs.efactor || 2.5,
-                    repetitions: srs.repetitions || 0,
+                    status: srs.status || 'new', // new, 1d, 10d, 30d, 180d, graduated
                     interval: srs.interval || 0,
                     nextReviewDate: srs.nextReviewDate || 0
                 };
@@ -485,49 +570,79 @@
             forceCloudPull();
         }
 
-        async function autoPullFromCloud() {
-            if (!userCloudKey) return;
+        async function testCloudConnection() {
+            if (!userCloudKey) {
+                showToast("Wpisz i zapisz klucz!");
+                return;
+            }
+            const resBox = document.getElementById('cloud-test-result');
+            resBox.style.display = "block";
+            resBox.style.background = "rgba(10, 132, 255, 0.15)";
+            resBox.style.color = "var(--accent-blue)";
+            resBox.innerText = "Testowanie połączenia z chmurą...";
+
             try {
-                const res = await fetch(`https://kvdb.io/4yKqT5E7U21L5K1A9Z9X7Y/${userCloudKey}`);
-                if (res.ok) {
-                    const cloudSrs = await res.json();
-                    if (cloudSrs && typeof cloudSrs === 'object') {
-                        localStorage.setItem('fiszki_srs_data', JSON.stringify(cloudSrs));
-                        initApp();
-                        showToast("Zsynchronizowano z chmurą!");
+                const endpoint = getCloudEndpoint();
+                const testPayload = JSON.stringify({ test: true, time: Date.now() });
+
+                const pushRes = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: testPayload
+                });
+
+                if (pushRes.ok) {
+                    const getRes = await fetch(endpoint);
+                    if (getRes.ok) {
+                        resBox.style.background = "rgba(48, 209, 88, 0.15)";
+                        resBox.style.color = "var(--accent-green)";
+                        resBox.innerText = `✅ Sukces! Chmura połączona dla klucza: "${userCloudKey}"`;
+                        autoPushToCloud();
+                        return;
                     }
                 }
+                throw new Error("Błąd sieci");
             } catch(e) {
-                console.log("Używam bazy lokalnej");
+                resBox.style.background = "rgba(255, 69, 58, 0.15)";
+                resBox.style.color = "var(--accent-red)";
+                resBox.innerText = "❌ Brak połączenia z serwerem chmury.";
             }
         }
 
+        async function autoPullFromCloud() {
+            const endpoint = getCloudEndpoint();
+            if (!endpoint) return;
+            try {
+                const res = await fetch(endpoint);
+                if (res.ok) {
+                    const cloudText = await res.text();
+                    const cloudSrs = JSON.parse(cloudText);
+                    if (cloudSrs && typeof cloudSrs === 'object') {
+                        localStorage.setItem('fiszki_srs_data', JSON.stringify(cloudSrs));
+                        initApp();
+                        showToast("Pobrano postęp z chmury!");
+                    }
+                }
+            } catch(e) {}
+        }
+
         async function autoPushToCloud() {
-            if (!userCloudKey) return;
+            const endpoint = getCloudEndpoint();
+            if (!endpoint) return;
             try {
                 const progress = localStorage.getItem('fiszki_srs_data') || '{}';
-                await fetch(`https://kvdb.io/4yKqT5E7U21L5K1A9Z9X7Y/${userCloudKey}`, {
+                await fetch(endpoint, {
                     method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
                     body: progress
                 });
                 updateCloudBadgeStatus();
             } catch(e) {}
         }
 
-        function forceCloudPush() {
-            if (!userCloudKey) { showToast("Ustaw najpierw klucz!"); return; }
-            autoPushToCloud();
-            showToast("Wysłano postęp do chmury!");
-        }
-
         function forceCloudPull() {
             if (!userCloudKey) { showToast("Ustaw najpierw klucz!"); return; }
             autoPullFromCloud();
-        }
-
-        function reloadFromWordsJs() {
-            initApp();
-            showToast("Wczytano słówka z pliku!");
         }
 
         function showToast(msg) {
@@ -585,9 +700,11 @@
 
         function applyLearningSession() {
             const now = Date.now();
-            const due = words.filter(w => w.nextReviewDate <= now && w.repetitions > 0);
-            const newWords = words.filter(w => w.repetitions === 0);
-            const future = words.filter(w => w.nextReviewDate > now && w.repetitions > 0);
+            const activeWords = words.filter(w => w.status !== 'graduated');
+
+            const due = activeWords.filter(w => w.nextReviewDate <= now && w.interval > 0);
+            const newWords = activeWords.filter(w => w.interval === 0);
+            const future = activeWords.filter(w => w.nextReviewDate > now && w.interval > 0);
 
             document.getElementById('count-due').innerText = due.length;
             document.getElementById('count-new').innerText = newWords.length;
@@ -620,7 +737,7 @@
             const counterEl = document.getElementById('session-counter');
             if (filteredWords.length === 0) {
                 document.getElementById('front-text').innerText = "Koniec fiszek!";
-                document.getElementById('front-desc').innerText = "Wszystkie słówka opanowane.";
+                document.getElementById('front-desc').innerText = "Wszystkie słówka w tym filtrze opanowane.";
                 document.getElementById('back-text').innerText = "Brawo!";
                 counterEl.innerText = "0 / 0";
                 return;
@@ -637,16 +754,6 @@
             document.getElementById('back-lang-title').innerText = isReversed ? "Polski" : "English";
             document.getElementById('back-text').innerText = isReversed ? w.pl : w.en;
             document.getElementById('back-desc').innerText = w.desc || "";
-
-            const ef = w.efactor || 2.5;
-            const rep = w.repetitions || 0;
-            const curInt = w.interval || 0;
-            let goodInt = rep === 0 ? 1 : (rep === 1 ? 4 : Math.round(curInt * ef));
-            let easyInt = Math.round((goodInt || 1) * (ef + 0.2));
-            if (easyInt <= goodInt) easyInt = goodInt + 2;
-
-            document.getElementById('lbl-good').innerText = `za ${goodInt}d`;
-            document.getElementById('lbl-easy').innerText = `za ${easyInt}d`;
         }
 
         function flipCard() {
@@ -667,39 +774,57 @@
             renderCard();
         }
 
-        function rateWord(quality) {
+        /* USTAWIENIA INTERWAŁÓW (DOBRZE = 10 DNI) */
+        function rateWord(level) {
             if (filteredWords.length === 0) return;
             const current = filteredWords[currentIndex];
             const idx = words.findIndex(w => w.id === current.id);
 
             if (idx !== -1) {
                 let w = words[idx];
-                let ef = w.efactor || 2.5;
-                let rep = w.repetitions || 0;
-                let interval = w.interval || 0;
+                let interval = 0;
+                let toastMsg = "";
 
-                if (quality < 3) {
-                    rep = 0;
-                    interval = 1;
+                if (level === 'redo') {
+                    // Ponów: OD RAZU (w tej samej sesji na koniec, bez dodawania dni)
+                    w.interval = 0;
+                    w.status = 'new';
+                    w.nextReviewDate = Date.now();
+
                     const redoWord = filteredWords.splice(currentIndex, 1)[0];
                     filteredWords.push(redoWord);
+                    toastMsg = "Ponawiamy dzisiaj na końcu!";
                 } else {
-                    if (rep === 0) interval = 1;
-                    else if (rep === 1) interval = 4;
-                    else interval = Math.round(interval * ef);
-                    rep++;
-                    
-                    ef = ef + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
-                    if (ef < 1.3) ef = 1.3;
-                    if (ef > 3.0) ef = 3.0;
+                    if (level === 'almost') {
+                        interval = 1; // Prawie -> powtórka za 1 dzień (jutro)
+                        w.status = '1d';
+                        toastMsg = "Powtórka za 1 dzień (jutro)";
+                    } else if (level === 'good') {
+                        interval = 10; // Dobrze -> POWTÓRKA ZA 10 DNI!
+                        w.status = '10d';
+                        toastMsg = "Powtórka za 10 dni";
+                    } else if (level === 'easy') {
+                        interval = 30; // Łatwo -> powtórka za 30 dni (za miesiąc)
+                        w.status = '30d';
+                        toastMsg = "Powtórka za 30 dni";
+                    } else if (level === 'know') {
+                        if (w.status === '180d' || w.interval === 180) {
+                            // Drugi raz Wiem pod rzędu po 180 dniach -> Opanowane do usunięcia!
+                            interval = 9999;
+                            w.status = 'graduated';
+                            toastMsg = "🎓 Opanowane! Trafia do usunięcia z words.js";
+                        } else {
+                            interval = 180; // Wiem pierwszy raz -> powtórka za 6 miesięcy
+                            w.status = '180d';
+                            toastMsg = "Powtórka za 6 miesięcy (180d)";
+                        }
+                    }
 
-                    w.efactor = ef;
-                    w.repetitions = rep;
                     w.interval = interval;
                     w.nextReviewDate = Date.now() + (interval * 86400000);
-                    w.status = interval > 15 ? 'mastered' : 'learning';
 
                     saveProgress();
+
                     if (currentIndex < filteredWords.length - 1) {
                         currentIndex++;
                     } else {
@@ -707,8 +832,9 @@
                     }
                 }
 
-                showToast(quality < 3 ? "Powtórzymy na końcu" : `Zapamiętano! Za ${interval}d`);
+                showToast(toastMsg);
                 renderCurrentMode();
+                updateStatsView();
             }
         }
 
@@ -738,10 +864,10 @@
                 btn.onclick = () => {
                     if (opt === current.en) {
                         btn.classList.add('correct');
-                        setTimeout(() => rateWord(3), 600);
+                        setTimeout(() => rateWord('good'), 600);
                     } else {
                         btn.classList.add('wrong');
-                        setTimeout(() => rateWord(1), 1000);
+                        setTimeout(() => rateWord('redo'), 1000);
                     }
                 };
                 container.appendChild(btn);
@@ -751,20 +877,68 @@
         function saveProgress() {
             let progressMap = {};
             words.forEach(w => {
-                if (w.repetitions > 0 || w.status !== 'new') {
+                if (w.interval > 0 || w.status !== 'new') {
                     progressMap[w.id] = {
                         status: w.status,
-                        efactor: w.efactor,
-                        repetitions: w.repetitions,
                         interval: w.interval,
                         nextReviewDate: w.nextReviewDate
                     };
                 }
             });
             localStorage.setItem('fiszki_srs_data', JSON.stringify(progressMap));
-            
-            // Automatyczna synchronizacja w chmurze
             autoPushToCloud();
+        }
+
+        /* GENERATOR NOWYCH SŁÓWEK DO WORDS.JS */
+        function generateWordsJsCode() {
+            const input = document.getElementById('bulk-input').value.trim();
+            if (!input) {
+                showToast("Wklej najpierw tekst!");
+                return;
+            }
+
+            const lines = input.split('\n');
+            let result = [];
+
+            lines.forEach(l => {
+                if (!l.trim()) return;
+                const parts = l.split(/[-:]+/);
+                if (parts.length >= 2) {
+                    const pl = parts[0].trim();
+                    let enDesc = parts[1].split('|');
+                    const en = enDesc[0].trim();
+                    const desc = enDesc[1] ? enDesc[1].trim() : "";
+
+                    result.push(`  { pl: "${pl}", en: "${en}", desc: "${desc}" }`);
+                }
+            });
+
+            if (result.length > 0) {
+                const code = `window.myVocabularyList = [\n${result.join(',\n')}\n];`;
+                document.getElementById('generated-code-text').value = code;
+                document.getElementById('generated-code-box').classList.remove('hidden');
+                showToast(`Wygenerowano kod dla ${result.length} słów!`);
+            } else {
+                showToast("Nieprawidłowy format! Użyj: polski - angielski");
+            }
+        }
+
+        function copyGeneratedCode() {
+            const text = document.getElementById('generated-code-text');
+            text.select();
+            document.execCommand('copy');
+            showToast("Skopiowano do schowka!");
+        }
+
+        /* CZYSZCZENIE PLIKU WORDS.JS BEZ OPANOWANYCH SŁÓWEK */
+        function generateCleanWordsJs() {
+            const cleanList = words.filter(w => w.status !== 'graduated');
+            const lines = cleanList.map(w => `  { pl: "${w.pl}", en: "${w.en}", desc: "${w.desc}" }`);
+            const code = `window.myVocabularyList = [\n${lines.join(',\n')}\n];`;
+
+            document.getElementById('generated-code-text').value = code;
+            document.getElementById('generated-code-box').classList.remove('hidden');
+            showToast(`Wyczyszczono! Pozostało ${cleanList.length} słówek.`);
         }
 
         function renderWordsList() {
@@ -776,19 +950,35 @@
             list.forEach(w => {
                 const item = document.createElement('div');
                 item.className = 'word-item';
+                let statusBadge = `<span style="font-size:10px; color:var(--text-sub);">${w.status}</span>`;
+                if (w.status === 'graduated') statusBadge = `<span style="font-size:10px; color:var(--accent-gold); font-weight:bold;">🎓 Opanowane</span>`;
+
                 item.innerHTML = `
                     <div>
                         <span class="word-pl">${w.pl}</span> &rarr; <span class="word-en">${w.en}</span>
                         ${w.desc ? `<div style="font-size:10px; color:var(--text-sub);">${w.desc}</div>` : ''}
                     </div>
+                    <div>${statusBadge}</div>
                 `;
                 container.appendChild(item);
             });
         }
 
+        /* SZCZEGÓŁOWE STATYSTYKI W 6 KATEGORIACH (Z DOBRZE = 10D) */
         function updateStatsView() {
-            document.getElementById('stat-total-val').innerText = words.length;
-            document.getElementById('stat-mastered-val').innerText = words.filter(w => w.status === 'mastered').length;
+            const cNew = words.filter(w => w.status === 'new' || w.interval === 0).length;
+            const c1d = words.filter(w => w.status === '1d').length;
+            const c10d = words.filter(w => w.status === '10d').length;
+            const c30d = words.filter(w => w.status === '30d').length;
+            const c180d = words.filter(w => w.status === '180d').length;
+            const cGrad = words.filter(w => w.status === 'graduated').length;
+
+            document.getElementById('st-new').innerText = cNew;
+            document.getElementById('st-1d').innerText = c1d;
+            document.getElementById('st-10d').innerText = c10d;
+            document.getElementById('st-30d').innerText = c30d;
+            document.getElementById('st-180d').innerText = c180d;
+            document.getElementById('st-grad').innerText = cGrad;
         }
 
         function exportProgress() {
