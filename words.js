@@ -12,7 +12,7 @@ window.myVocabularyList = [
   { pl: "Szkoła", en: "School", desc: "Miejsce nauki" },
   { pl: "Woda", en: "Water", desc: "Niezbędny płyn" },
   { pl: "Dzień", en: "Day", desc: "Czas od wschodu do zachodu" },
-  { pl: "Noc", en: "Night", desc: "Pora ciemności" },
+  { pl: "Nocc", en: "Night", desc: "Pora ciemności" },
 
   // Przykładowe słownictwo zaawansowane (C1 / CAE)
   { pl: "Skrupulatny / Drobiazgowy", en: "Meticulous", desc: "Very careful and precise" },
