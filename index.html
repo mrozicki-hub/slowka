@@ -541,12 +541,25 @@
         let currentLearnMode = 'flashcards';
         let cardDirection = 'PL-EN';
 
+        // Pamięć podręczna załadowanych głosów systemowych
+        let availableVoices = [];
+
+        function loadSystemVoices() {
+            if ('speechSynthesis' in window) {
+                availableVoices = window.speechSynthesis.getVoices();
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             initApp();
             setupTouchGestures();
             loadGitHubSettings();
+            
+            loadSystemVoices();
             if ('speechSynthesis' in window) {
-                window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+                window.speechSynthesis.onvoiceschanged = () => {
+                    loadSystemVoices();
+                };
             }
         });
 
@@ -559,27 +572,33 @@
 
         function getBestVoice(targetLang) {
             if (!('speechSynthesis' in window)) return null;
-            const voices = window.speechSynthesis.getVoices();
+            
+            // Pobieramy aktualną listę głosów
+            let voices = availableVoices.length > 0 ? availableVoices : window.speechSynthesis.getVoices();
             if (!voices || voices.length === 0) return null;
 
-            const langPrefix = targetLang.substring(0, 2).toLowerCase();
+            const langPrefix = targetLang.substring(0, 2).toLowerCase(); // np. 'en' lub 'pl'
 
-            // Odfiltrowujemy głosy z czarnej listy oraz dopasowujemy język
-            const validVoices = voices.filter(v => {
+            // Odfiltrowujemy głosy efektowe oraz dopasowujemy język
+            let validVoices = voices.filter(v => {
                 const nameLower = v.name.toLowerCase();
                 const matchesLang = v.lang.toLowerCase().replace('_', '-').startsWith(langPrefix);
                 const isNovelty = NOVELTY_VOICE_NAMES.some(n => nameLower.includes(n));
                 return matchesLang && !isNovelty;
             });
 
+            // Jeśli dla angielskiego nie znaleziono idealnego dopasowania, bierzemy dowolny głos angielski
+            if (validVoices.length === 0 && langPrefix === 'en') {
+                validVoices = voices.filter(v => v.lang.toLowerCase().includes('en'));
+            }
+
             if (validVoices.length === 0) return null;
 
-            // Priorytet dla naturalnych głosów premium / ludzkich
+            // Priorytet dla znanych, naturalnych głosów premium / ludzkich
             const preferredNames = ['samantha', 'alex', 'daniel', 'karen', 'zosia', 'krzysztof', 'ewa', 'google', 'premium', 'enhanced', 'natural'];
             const preferred = validVoices.find(v => preferredNames.some(p => v.name.toLowerCase().includes(p)));
 
-            if (preferred) return preferred;
-            return validVoices.find(v => v.default) || validVoices[0];
+            return preferred || validVoices[0];
         }
 
         /* PRECYZYJNY LEKTOR AUDIO (SPEECH SYNTHESIS) */
