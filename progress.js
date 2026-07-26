@@ -28,5 +28,10 @@ window.myProgressData = {
     "status": "1d",
     "interval": 1,
     "nextReviewDate": 1785171571540
+  },
+  "w_RXNrYWxhY2phX8Krc3RvcG5pb3dlIHp3acSZa3N6YW4=": {
+    "status": "1d",
+    "interval": 1,
+    "nextReviewDate": 1785173150532
   }
 };
