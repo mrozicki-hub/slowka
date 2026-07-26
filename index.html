@@ -489,12 +489,13 @@
         <!-- TAB 4: SYNC & GITHUB -->
         <section id="view-sync" class="hidden" style="display: flex; flex-direction: column; gap: 12px;">
             <div class="form-card">
-                <div class="form-title">Direct GitHub API Sync (Zapis 1-kliknięciem)</div>
+                <div class="form-title">Direct GitHub API Sync (Zapis / Odczyt)</div>
                 <input type="text" id="gh-username" placeholder="GitHub Username" style="background:var(--bg-main); border:1px solid var(--border-color); color:#fff; padding:10px; border-radius:10px; font-size:12px;">
                 <input type="text" id="gh-repo" placeholder="Nazwa Repozytorium" style="background:var(--bg-main); border:1px solid var(--border-color); color:#fff; padding:10px; border-radius:10px; font-size:12px;">
                 <input type="password" id="gh-token" placeholder="GitHub Token (PAT)" style="background:var(--bg-main); border:1px solid var(--border-color); color:#fff; padding:10px; border-radius:10px; font-size:12px;">
                 <button class="btn-secondary" onclick="saveGitHubSettings()">Zapisz dane połączenia</button>
-                <button class="btn-primary" onclick="pushProgressToGitHub()">Zapisz bezpośrednio na GitHub</button>
+                <button class="btn-primary" onclick="pullProgressFromGitHub()" style="background-color: var(--accent-blue);">⬇️ Pobierz najnowszy postęp z GitHub</button>
+                <button class="btn-primary" onclick="pushProgressToGitHub()">⬆️ Zapisz bezpośrednio na GitHub</button>
             </div>
 
             <div class="form-card">
@@ -1021,47 +1022,65 @@
                 return;
             }
 
-            let progressMap = {};
-            words.forEach(w => {
-                if (w.interval > 0 || w.status !== 'new') {
-                    progressMap[w.id] = { status: w.status, interval: w.interval, nextReviewDate: w.nextReviewDate };
-                }
-            });
+        async function pullProgressFromGitHub() {
+            const user = localStorage.getItem('gh_user');
+            const repo = localStorage.getItem('gh_repo');
+            const token = localStorage.getItem('gh_token');
 
-            const content = `window.myProgressData = ${JSON.stringify(progressMap, null, 2)};`;
+            if (!user || !repo || !token) {
+                showToast("Uzupełnij i zapisz dane połączenia z GitHub!");
+                return;
+            }
+
             const path = 'progress.js';
-            const url = `https://api.github.com/repos/${user}/${repo}/contents/${path}`;
+            const url = `https://api.github.com/repos/${user}/${repo}/contents/${path}?ref=main&t=${Date.now()}`;
 
             try {
-                let sha = "";
-                const getRes = await fetch(url, { headers: { 'Authorization': `token ${token}` } });
-                if (getRes.ok) {
-                    const getData = await getRes.json();
-                    sha = getData.sha;
-                }
-
-                const body = {
-                    message: "Auto-sync progress via Słówka App",
-                    content: btoa(unescape(encodeURIComponent(content))),
-                    sha: sha || undefined
-                };
-
-                const putRes = await fetch(url, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `token ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(body)
+                showToast("Pobieranie z GitHub...");
+                const res = await fetch(url, { 
+                    headers: { 'Authorization': `token ${token}` },
+                    cache: 'no-store'
                 });
 
-                if (putRes.ok) {
-                    showToast("✅ Postęp zapisany na GitHub!");
+                if (res.ok) {
+                    const data = await res.json();
+                    // Odkodowanie zawartości Base64 z UTF-8
+                    const rawContent = decodeURIComponent(escape(atob(data.content.replace(/\n/g, ''))));
+                    
+                    // Wyciągnięcie obiektu JSON z pliku progress.js
+                    const jsonMatch = rawContent.match(/window\.myProgressData\s*=\s*(\{[\s\S]*\});?/);
+                    if (jsonMatch && jsonMatch[1]) {
+                        const downloadedProgress = JSON.parse(jsonMatch[1]);
+                        
+                        // Zapisanie w localStorage
+                        localStorage.setItem('fiszki_srs_data', JSON.stringify(downloadedProgress));
+                        
+                        // Aktualizacja w pamięci podręcznej aplikacji
+                        words.forEach(w => {
+                            const srs = downloadedProgress[w.id];
+                            if (srs) {
+                                w.status = srs.status || 'new';
+                                w.interval = srs.interval || 0;
+                                w.nextReviewDate = srs.nextReviewDate || 0;
+                            } else {
+                                w.status = 'new';
+                                w.interval = 0;
+                                w.nextReviewDate = 0;
+                            }
+                        });
+
+                        applyLearningSession();
+                        updateStatsView();
+                        showToast("✅ Pomyślnie wczytano postęp z GitHub!");
+                    } else {
+                        showToast("❌ Błąd struktury pliku progress.js");
+                    }
                 } else {
-                    showToast("❌ Błąd zapisu na GitHub");
+                    showToast("❌ Błąd pobierania pliku z GitHub");
                 }
             } catch(e) {
-                showToast("❌ Błąd połączenia z GitHub API");
+                console.error(e);
+                showToast("❌ Połączenie nie powiodło się");
             }
         }
 
