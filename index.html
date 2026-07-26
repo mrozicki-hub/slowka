@@ -120,20 +120,32 @@
             color: var(--text-main);
         }
 
+        /* 4 KAFELKI FILTRÓW NAUKOWYCH */
         .counter-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
             background-color: var(--bg-card);
             border: 1px solid var(--border-color);
-            padding: 10px;
+            padding: 10px 6px;
             border-radius: var(--radius-main);
             text-align: center;
             margin-bottom: 12px;
         }
 
-        .counter-num { font-size: 16px; font-weight: 700; display: block; }
-        .counter-label { font-size: 9px; color: var(--text-sub); text-transform: uppercase; font-weight: 600; }
+        .counter-item {
+            cursor: pointer;
+            padding: 4px 2px;
+            border-radius: 8px;
+            transition: background 0.2s ease;
+        }
+
+        .counter-item:active {
+            background: var(--bg-card-secondary);
+        }
+
+        .counter-num { font-size: 15px; font-weight: 800; display: block; }
+        .counter-label { font-size: 8px; color: var(--text-sub); text-transform: uppercase; font-weight: 700; }
 
         .card-perspective {
             perspective: 1000px;
@@ -298,6 +310,10 @@
                         <span class="counter-num" style="color: var(--text-sub);" id="count-future">0</span>
                         <span class="counter-label">Zabezpieczone</span>
                     </div>
+                    <div class="counter-item" onclick="filterSession('all')">
+                        <span class="counter-num" style="color: var(--accent-gold);" id="count-all">0</span>
+                        <span class="counter-label">Wszystkie</span>
+                    </div>
                 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -329,12 +345,13 @@
                     </div>
                 </div>
 
+                <!-- PRZYCISKI DO SWOBODNEGO PRZEGLĄDANIA BEZ WŁĄCZANIA OCENIANIA -->
                 <div style="display: flex; justify-content: space-between; margin-top: 8px;">
                     <button class="btn-secondary" onclick="prevCard()" style="padding: 6px 12px; font-size: 11px;">&larr; Poprzednia</button>
                     <button class="btn-secondary" onclick="nextCard()" style="padding: 6px 12px; font-size: 11px;">Następna &rarr;</button>
                 </div>
 
-                <!-- 5 PRZYCISKÓW OCENY -->
+                <!-- 5 PRZYCISKÓW OCENY (SRS) -->
                 <div class="controls-grid">
                     <button class="srs-btn redo" onclick="rateWord('redo')">
                         <span class="srs-title">Ponów</span>
@@ -601,10 +618,12 @@
             document.getElementById('count-due').innerText = due.length;
             document.getElementById('count-new').innerText = newWords.length;
             document.getElementById('count-future').innerText = future.length;
+            document.getElementById('count-all').innerText = activeWords.length;
 
             if (activeFilter === 'due') filteredWords = due;
             else if (activeFilter === 'new') filteredWords = newWords;
             else if (activeFilter === 'future') filteredWords = future;
+            else if (activeFilter === 'all') filteredWords = [...activeWords];
             else filteredWords = [...due, ...newWords, ...future];
 
             currentIndex = 0;
@@ -654,6 +673,7 @@
             isFlipped = !isFlipped;
         }
 
+        /* SWOBODNE NAWIGOWANIE BEZ MODYFIKOWANIA HISTORII NAUKI */
         function nextCard() {
             if (filteredWords.length === 0) return;
             currentIndex = (currentIndex + 1) % filteredWords.length;
@@ -748,6 +768,7 @@
             document.getElementById('count-due').innerText = due.length;
             document.getElementById('count-new').innerText = newWords.length;
             document.getElementById('count-future').innerText = future.length;
+            document.getElementById('count-all').innerText = activeWords.length;
         }
 
         function renderQuiz() {
@@ -847,7 +868,6 @@
             const encodedContent = btoa(unescape(encodeURIComponent(content)));
 
             try {
-                // Pobranie SHA istniejącego pliku progress.js
                 let sha = "";
                 const getRes = await fetch(url, {
                     headers: { 'Authorization': `token ${token}` }
@@ -857,7 +877,6 @@
                     sha = fileData.sha;
                 }
 
-                // Aktualizacja / Utworzenie progress.js na GitHubie
                 const putRes = await fetch(url, {
                     method: 'PUT',
                     headers: {
