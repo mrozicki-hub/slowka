@@ -270,12 +270,6 @@
         .quiz-opt-btn.correct { background-color: rgba(48, 209, 88, 0.2) !important; border-color: var(--accent-green) !important; color: var(--accent-green) !important; }
         .quiz-opt-btn.wrong { background-color: rgba(255, 69, 58, 0.2) !important; border-color: var(--accent-red) !important; color: var(--accent-red) !important; }
 
-        .cloze-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 14px; margin: auto 0; }
-        .cloze-sentence { font-size: 15px; font-weight: 600; line-height: 1.4; color: #fff; text-align: center; }
-        .cloze-gap { color: var(--accent-gold); border-bottom: 2px dashed var(--accent-gold); padding: 0 6px; font-weight: 800; }
-        .cloze-input { background: var(--bg-main); border: 1px solid var(--border-color); color: #fff; padding: 12px; border-radius: 12px; font-size: 15px; font-weight: 600; text-align: center; width: 100%; outline: none; }
-        .cloze-input:focus { border-color: var(--accent-blue); }
-
         .form-card { background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 16px; border-radius: var(--radius-main); display: flex; flex-direction: column; gap: 10px; }
         .form-title { font-size: 13px; font-weight: 700; color: var(--text-main); }
 
@@ -557,14 +551,13 @@
         function speakText(text, lang = 'pl-PL') {
             if (!text || !('speechSynthesis' in window)) return;
             try {
-                window.speechSynthesis.cancel(); // Zatrzymaj poprzednie odtwarzanie
+                window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = lang;
                 utterance.rate = 0.9;
                 utterance.volume = 1.0;
                 utterance.pitch = 1.0;
 
-                // Wybór dedykowanego głosu z systemu, jeśli jest dostępny
                 const voices = window.speechSynthesis.getVoices();
                 if (voices && voices.length > 0) {
                     const matchedVoice = voices.find(v => v.lang.toLowerCase().startsWith(lang.toLowerCase().substring(0, 2)));
@@ -681,7 +674,7 @@
         /* 1. RENDERING FISZKI 3D */
         function renderCard() {
             const inner = document.getElementById('card-inner');
-            inner.classList.remove('flipped');
+            if (inner) inner.classList.remove('flipped');
             isFlipped = false;
 
             const counterEl = document.getElementById('session-counter');
@@ -692,12 +685,12 @@
                 document.getElementById('back-text').innerText = "Gratulacje!";
                 document.getElementById('back-ipa-container').innerHTML = "";
                 document.getElementById('back-sentence-container').classList.add('hidden');
-                counterEl.innerText = "0 / 0";
+                if (counterEl) counterEl.innerText = "0 / 0";
                 return;
             }
 
             if (currentIndex >= filteredWords.length) currentIndex = 0;
-            counterEl.innerText = `${currentIndex + 1} / ${filteredWords.length}`;
+            if (counterEl) counterEl.innerText = `${currentIndex + 1} / ${filteredWords.length}`;
             
             const w = filteredWords[currentIndex];
             const isReversed = cardDirection === 'EN-PL';
@@ -805,51 +798,6 @@
         }
 
         /* NAWIGACJA POPRZEDNIA / NASTĘPNA */
-                document.getElementById('cloze-prompt-pl').innerText = "";
-                return;
-            }
-
-            if (currentIndex >= filteredWords.length) currentIndex = 0;
-            const w = filteredWords[currentIndex];
-            document.getElementById('cloze-prompt-pl').innerText = `Definicja: ${w.en}`;
-
-            let sentenceDisplay = "";
-            if (w.sentence && w.sentence.toLowerCase().includes(w.pl.toLowerCase())) {
-                const regex = new RegExp(w.pl, "gi");
-                sentenceDisplay = w.sentence.replace(regex, `<span class="cloze-gap">[ _____ ]</span>`);
-            } else if (w.sentence) {
-                sentenceDisplay = `${w.sentence} <br><span class="cloze-gap">[ _____ ]</span>`;
-            } else {
-                sentenceDisplay = `Wpisz pojęcie: <span class="cloze-gap">[ _____ ]</span>`;
-            }
-
-            document.getElementById('cloze-sentence-display').innerHTML = sentenceDisplay;
-        }
-
-        function checkClozeAnswer() {
-            if (!filteredWords || filteredWords.length === 0) return;
-            const w = filteredWords[currentIndex];
-            const userAns = document.getElementById('cloze-input').value.trim().toLowerCase();
-            const correctAns = w.pl.trim().toLowerCase();
-            const feedbackBox = document.getElementById('cloze-feedback-box');
-
-            feedbackBox.classList.remove('hidden');
-            speakText(w.pl);
-
-            if (userAns === correctAns) {
-                feedbackBox.style.background = "rgba(48, 209, 88, 0.2)";
-                feedbackBox.style.color = "var(--accent-green)";
-                feedbackBox.innerHTML = `✅ Świetnie! Poprawne pojęcie: <b>${w.pl}</b> ${w.ipa ? `(${w.ipa})` : ''}`;
-            } else {
-                feedbackBox.style.background = "rgba(255, 69, 58, 0.2)";
-                feedbackBox.style.color = "var(--accent-red)";
-                feedbackBox.innerHTML = `❌ Prawidłowo: <b>${w.pl}</b> ${w.ipa ? `(${w.ipa})` : ''}`;
-            }
-
-            document.getElementById('cloze-input').disabled = true;
-            document.getElementById('cloze-check-btn').disabled = true;
-        }
-
         function nextCard() {
             if (!filteredWords || filteredWords.length === 0) return;
             currentIndex = (currentIndex + 1) % filteredWords.length;
@@ -1092,6 +1040,7 @@
         function setupTouchGestures() {
             const touchArea = document.getElementById('card-touch-area');
             let startX = 0; let startY = 0;
+            if (!touchArea) return;
             touchArea.addEventListener('touchstart', (e) => {
                 startX = e.changedTouches[0].screenX;
                 startY = e.changedTouches[0].screenY;
