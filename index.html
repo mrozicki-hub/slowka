@@ -4,9 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Słówka</title>
-    <!-- Zewnętrzne pliki z bazy na GitHubie -->
-    <script src="words.js"></script>
-    <script src="progress.js"></script>
+    
+    <script>
+        window.myVocabularyList = window.myVocabularyList || [];
+        window.myProgressData = window.myProgressData || {};
+    </script>
+    <script src="words.js" onerror="console.warn('Brak pliku words.js w katalogu')"></script>
+    <script src="progress.js" onerror="console.warn('Brak pliku progress.js w katalogu')"></script>
+
     <style>
         :root {
             --bg-main: #000000;
@@ -119,13 +124,20 @@
         .counter-num { font-size: 15px; font-weight: 700; display: block; }
         .counter-label { font-size: 8px; color: var(--text-sub); text-transform: uppercase; font-weight: 600; }
 
-        /* Fiszka 3D */
+        #mode-flashcards {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+        }
+
         .card-perspective {
             perspective: 1000px;
             -webkit-perspective: 1000px;
             width: 100%;
-            min-height: 250px;
-            margin: auto 0;
+            flex: 1;
+            min-height: 220px;
+            margin: 8px 0;
             cursor: pointer;
         }
 
@@ -243,14 +255,12 @@
         .srs-title { font-size: 11px; font-weight: 700; white-space: nowrap; }
         .srs-sub { font-size: 8px; color: var(--text-sub); white-space: nowrap; }
 
-        /* Mode Quiz */
         .quiz-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 14px; margin: auto 0; }
         .quiz-options { display: grid; grid-template-columns: 1fr; gap: 8px; }
         .quiz-opt-btn { background-color: var(--bg-card-secondary); border: 1px solid var(--border-color); color: var(--text-main); padding: 12px 14px; border-radius: 12px; font-size: 13px; font-weight: 600; text-align: left; cursor: pointer; line-height: 1.3; }
         .quiz-opt-btn.correct { background-color: rgba(48, 209, 88, 0.2) !important; border-color: var(--accent-green) !important; color: var(--accent-green) !important; }
         .quiz-opt-btn.wrong { background-color: rgba(255, 69, 58, 0.2) !important; border-color: var(--accent-red) !important; color: var(--accent-red) !important; }
 
-        /* Mode Cloze (Uzupełnianie luk) */
         .cloze-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 14px; margin: auto 0; }
         .cloze-sentence { font-size: 15px; font-weight: 600; line-height: 1.4; color: #fff; text-align: center; }
         .cloze-gap { color: var(--accent-gold); border-bottom: 2px dashed var(--accent-gold); padding: 0 6px; font-weight: 800; }
@@ -575,7 +585,6 @@
             loadGitHubSettings();
         });
 
-        /* SPEECH SYNTHESIS Z AUTOMATYCZNYM WYKRYWANIEM JĘZYKA */
         function speakText(text) {
             if (!text || !('speechSynthesis' in window)) return;
             try {
@@ -591,7 +600,6 @@
         }
 
         function initApp() {
-            // Pobieranie wyłącznie z zewnętrznych zmiennych wczytanych z words.js oraz progress.js
             const rawList = (window.myVocabularyList && Array.isArray(window.myVocabularyList))
                 ? window.myVocabularyList 
                 : [];
@@ -693,7 +701,6 @@
             else if (currentLearnMode === 'cloze') renderCloze();
         }
 
-        /* 1. RENDERING FISZKI 3D */
         function renderCard() {
             const inner = document.getElementById('card-inner');
             inner.classList.remove('flipped');
@@ -766,7 +773,6 @@
             if (w.sentence) speakText(w.sentence);
         }
 
-        /* 2. RENDERING QUIZ 1 Z 4 */
         function renderQuiz() {
             const container = document.getElementById('quiz-options-container');
             container.innerHTML = "";
@@ -812,7 +818,6 @@
             speakText(filteredWords[currentIndex].pl);
         }
 
-        /* 3. RENDERING CLOZE TEST */
         function renderCloze() {
             const feedbackBox = document.getElementById('cloze-feedback-box');
             feedbackBox.classList.add('hidden');
@@ -867,7 +872,6 @@
             document.getElementById('cloze-check-btn').disabled = true;
         }
 
-        /* NAWIGACJA POPRZEDNIA / NASTĘPNA */
         function nextCard() {
             if (!filteredWords || filteredWords.length === 0) return;
             currentIndex = (currentIndex + 1) % filteredWords.length;
@@ -880,7 +884,6 @@
             renderCurrentMode();
         }
 
-        /* LOGIKA SYSTEMU SRS */
         function rateWord(level) {
             if (!filteredWords || filteredWords.length === 0) return;
             const current = filteredWords[currentIndex];
@@ -916,7 +919,6 @@
                     w.nextReviewDate = Date.now() + (interval * 86400000);
                     saveProgressLocal();
 
-                    // W trybach powtórek (due/new/future) usuwamy pozycję z bieżącej listy
                     if (activeFilter !== 'all') {
                         filteredWords.splice(currentIndex, 1);
                         if (currentIndex >= filteredWords.length) currentIndex = 0;
@@ -945,7 +947,6 @@
             localStorage.setItem('fiszki_srs_data', JSON.stringify(progressMap));
         }
 
-        /* SAFE GENERATOR KODU DO WORDS.JS */
         function escapeJS(str) {
             if (!str) return "";
             return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, ' ');
@@ -1030,7 +1031,6 @@
             document.getElementById('st-grad').innerText = words.filter(w => w.status === 'graduated').length;
         }
 
-        /* GITHUB DIRECT SYNC */
         function saveGitHubSettings() {
             localStorage.setItem('gh_user', document.getElementById('gh-username').value.trim());
             localStorage.setItem('gh_repo', document.getElementById('gh-repo').value.trim());
