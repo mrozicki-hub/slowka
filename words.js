@@ -19,7 +19,7 @@ window.myVocabularyList = [
   { pl: "Niejasny / Dwuznaczny", en: "Ambiguous", desc: "Open to more than one interpretation" },
   { pl: "Wszechobecny", en: "Ubiquitous", desc: "Present, appearing, or found everywhere" },
   { pl: "Przemijający / Ulotny", en: "Transient", desc: "Lasting only for a short time" },
-  { pl: "Zaradny / Pomysłowy", en: "Resourceful", desc: "Having the ability to find quick solutions" }
+  { pl: "Zaradny / Pomysłowy", en: "Resourceful", desc: "Having the ability to find quick solutions" },
 
   //Słownictwo
   { pl: "Galanteryjny", en: "Wyroby galanteryjne lub bardzo uprzejme, wytworne zachowanie", desc: "Drobne akcesoria (portfele, paski, torebki) lub eleganckie zachowanie wobec kobiet." },
