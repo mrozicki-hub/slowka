@@ -29,9 +29,34 @@ window.myProgressData = {
     "interval": 1,
     "nextReviewDate": 1785171571540
   },
+  "w_RGVzYWtyYWxpemFjamFfwqtwb3piYXdpZW5pZSBjemVnb8WbIA==": {
+    "status": "30d",
+    "interval": 30,
+    "nextReviewDate": 1787687188659
+  },
   "w_RXNrYWxhY2phX8Krc3RvcG5pb3dlIHp3acSZa3N6YW4=": {
     "status": "1d",
     "interval": 1,
     "nextReviewDate": 1785173150532
+  },
+  "w_S29uc3RhdGFjamFfwqtzdHdpZXJkemVuaWUgamFraWVn": {
+    "status": "30d",
+    "interval": 30,
+    "nextReviewDate": 1787687231886
+  },
+  "w_SW1wb25kZXJhYmlsaWFfwqtyemVjenkgbmlldWNod3l0bmUg": {
+    "status": "1d",
+    "interval": 1,
+    "nextReviewDate": 1785181642740
+  },
+  "w_SW50ZXJsb2t1dG9yX8Krcm96bcOzd2Nhwrs=": {
+    "status": "30d",
+    "interval": 30,
+    "nextReviewDate": 1787687245905
+  },
+  "w_TGFwaWRhcm55X8Kra3LDs3RraSBpIHd5cmF6aXN0ecK7": {
+    "status": "30d",
+    "interval": 30,
+    "nextReviewDate": 1787687248470
   }
 };
