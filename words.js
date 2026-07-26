@@ -21,7 +21,7 @@ window.myVocabularyList = [
   { pl: "Przemijający / Ulotny", en: "Transient", desc: "Lasting only for a short time" },
   { pl: "Zaradny / Pomysłowy", en: "Resourceful", desc: "Having the ability to find quick solutions" }
 
-//Słownictwo 
-    { pl: "Galanteryjny", en: "Wyroby galanteryjne lub bardzo uprzejme, wytworne zachowanie", desc: "Drobne akcesoria (portfele, paski, torebki) lub eleganckie zachowanie wobec kobiet." },
+  //Słownictwo
+  { pl: "Galanteryjny", en: "Wyroby galanteryjne lub bardzo uprzejme, wytworne zachowanie", desc: "Drobne akcesoria (portfele, paski, torebki) lub eleganckie zachowanie wobec kobiet." },
   { pl: "Frymarcząc", en: "1. Dawniej: czynić przedmiotem targu/handlu rzeczy, które nie powinny być źródłem zysku.\n2. Dawniej: uprawiać handel zamienny.", desc: "Forma imiesłowowa od 'frymarczyć' (handlować/targować się)."  }
 ];
