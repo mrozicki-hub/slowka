@@ -318,7 +318,6 @@
             <div class="tab-switcher">
                 <button class="tab-btn active" id="btn-mode-flashcards" onclick="switchLearnMode('flashcards')">Fiszki 3D</button>
                 <button class="tab-btn" id="btn-mode-quiz" onclick="switchLearnMode('quiz')">Quiz 1 z 4</button>
-                <button class="tab-btn" id="btn-mode-cloze" onclick="switchLearnMode('cloze')">Uzupełnij luki</button>
             </div>
 
             <!-- FILTRY SESJI -->
@@ -433,46 +432,6 @@
                         <div id="quiz-ipa-container"></div>
                     </div>
                     <div class="quiz-options" id="quiz-options-container"></div>
-                </div>
-            </div>
-
-            <!-- MODE C: CLOZE TEST (UZUPEŁNIANIE LUK) -->
-            <div id="mode-cloze" class="hidden" style="display: flex; flex-direction: column; flex: 1;">
-                <div class="cloze-card">
-                    <div style="text-align: center; display: flex; flex-direction: column; gap: 6px;">
-                        <span class="card-lang">Uzupełnij słowo w kontekście</span>
-                        <div class="cloze-sentence" id="cloze-sentence-display">---</div>
-                        <div style="font-size: 12px; color: var(--accent-blue);" id="cloze-prompt-pl">---</div>
-                    </div>
-
-                    <input type="text" id="cloze-input" class="cloze-input" placeholder="Wpisz szukane słowo..." autocomplete="off" autocapitalize="none">
-                    
-                    <button class="btn-primary" id="cloze-check-btn" onclick="checkClozeAnswer()">Sprawdź odpowiedź</button>
-
-                    <div id="cloze-feedback-box" class="hidden" style="text-align: center; padding: 10px; border-radius: 12px; font-size: 13px; font-weight: 700;"></div>
-
-                    <div class="controls-grid" id="cloze-srs-controls" style="margin-top: 4px;">
-                        <button class="srs-btn redo" onclick="rateWord('redo')">
-                            <span class="srs-title">Ponów</span>
-                            <span class="srs-sub">od razu</span>
-                        </button>
-                        <button class="srs-btn almost" onclick="rateWord('almost')">
-                            <span class="srs-title">Prawie</span>
-                            <span class="srs-sub">za 1d</span>
-                        </button>
-                        <button class="srs-btn good" onclick="rateWord('good')">
-                            <span class="srs-title">Dobrze</span>
-                            <span class="srs-sub">za 10d</span>
-                        </button>
-                        <button class="srs-btn easy" onclick="rateWord('easy')">
-                            <span class="srs-title">Łatwo</span>
-                            <span class="srs-sub">za 30d</span>
-                        </button>
-                        <button class="srs-btn know" onclick="rateWord('know')">
-                            <span class="srs-title">Wiem</span>
-                            <span class="srs-sub">za 180d</span>
-                        </button>
-                    </div>
                 </div>
             </div>
         </section>
@@ -594,17 +553,27 @@
             loadGitHubSettings();
         });
 
-        function speakText(text) {
+        /* PRECYZYJNY LEKTOR AUDIO (SPEECH SYNTHESIS) */
+        function speakText(text, lang = 'pl-PL') {
             if (!text || !('speechSynthesis' in window)) return;
             try {
-                window.speechSynthesis.cancel();
+                window.speechSynthesis.cancel(); // Zatrzymaj poprzednie odtwarzanie
                 const utterance = new SpeechSynthesisUtterance(text);
-                const isPolish = /[ąćęłńóśźż]/i.test(text) || text.length > 25;
-                utterance.lang = isPolish ? 'pl-PL' : 'en-US';
+                utterance.lang = lang;
                 utterance.rate = 0.9;
+                utterance.volume = 1.0;
+                utterance.pitch = 1.0;
+
+                // Wybór dedykowanego głosu z systemu, jeśli jest dostępny
+                const voices = window.speechSynthesis.getVoices();
+                if (voices && voices.length > 0) {
+                    const matchedVoice = voices.find(v => v.lang.toLowerCase().startsWith(lang.toLowerCase().substring(0, 2)));
+                    if (matchedVoice) utterance.voice = matchedVoice;
+                }
+
                 window.speechSynthesis.speak(utterance);
             } catch(e) {
-                console.log("Audio speech unavailable");
+                console.warn("Błąd lektora audio", e);
             }
         }
 
@@ -659,7 +628,7 @@
 
         function switchLearnMode(mode) {
             currentLearnMode = mode;
-            ['flashcards', 'quiz', 'cloze'].forEach(m => {
+            ['flashcards', 'quiz'].forEach(m => {
                 document.getElementById(`mode-${m}`).classList.add('hidden');
                 document.getElementById(`btn-mode-${m}`).classList.remove('active');
             });
@@ -707,9 +676,9 @@
         function renderCurrentMode() {
             if (currentLearnMode === 'flashcards') renderCard();
             else if (currentLearnMode === 'quiz') renderQuiz();
-            else if (currentLearnMode === 'cloze') renderCloze();
         }
 
+        /* 1. RENDERING FISZKI 3D */
         function renderCard() {
             const inner = document.getElementById('card-inner');
             inner.classList.remove('flipped');
@@ -765,23 +734,29 @@
             if (e) e.stopPropagation();
             if (!filteredWords || filteredWords.length === 0) return;
             const w = filteredWords[currentIndex];
-            speakText(cardDirection === 'EN-PL' ? w.en : w.pl);
+            const isReversed = cardDirection === 'EN-PL';
+            speakText(isReversed ? w.en : w.pl, isReversed ? 'en-US' : 'pl-PL');
         }
 
         function playBackAudio(e) {
             if (e) e.stopPropagation();
             if (!filteredWords || filteredWords.length === 0) return;
             const w = filteredWords[currentIndex];
-            speakText(cardDirection === 'EN-PL' ? w.pl : w.en);
+            const isReversed = cardDirection === 'EN-PL';
+            speakText(isReversed ? w.pl : w.en, isReversed ? 'pl-PL' : 'en-US');
         }
 
         function playSentenceAudio(e) {
             if (e) e.stopPropagation();
             if (!filteredWords || filteredWords.length === 0) return;
             const w = filteredWords[currentIndex];
-            if (w.sentence) speakText(w.sentence);
+            if (w.sentence) {
+                const isPolish = /[ąćęłńóśźż]/i.test(w.sentence);
+                speakText(w.sentence, isPolish ? 'pl-PL' : 'en-US');
+            }
         }
 
+        /* 2. RENDERING QUIZ 1 Z 4 */
         function renderQuiz() {
             const container = document.getElementById('quiz-options-container');
             container.innerHTML = "";
@@ -809,7 +784,8 @@
                 btn.className = 'quiz-opt-btn';
                 btn.innerText = opt;
                 btn.onclick = () => {
-                    speakText(opt);
+                    const isPl = /[ąćęłńóśźż]/i.test(opt);
+                    speakText(opt, isPl ? 'pl-PL' : 'en-US');
                     if (opt === current.en) {
                         btn.classList.add('correct');
                         setTimeout(() => rateWord('good'), 600);
@@ -824,18 +800,11 @@
 
         function playQuizAudio() {
             if (!filteredWords || filteredWords.length === 0) return;
-            speakText(filteredWords[currentIndex].pl);
+            const current = filteredWords[currentIndex];
+            speakText(current.pl, 'pl-PL');
         }
 
-        function renderCloze() {
-            const feedbackBox = document.getElementById('cloze-feedback-box');
-            feedbackBox.classList.add('hidden');
-            document.getElementById('cloze-input').value = "";
-            document.getElementById('cloze-input').disabled = false;
-            document.getElementById('cloze-check-btn').disabled = false;
-
-            if (!filteredWords || filteredWords.length === 0) {
-                document.getElementById('cloze-sentence-display').innerText = "Brak słówek!";
+        /* NAWIGACJA POPRZEDNIA / NASTĘPNA */
                 document.getElementById('cloze-prompt-pl').innerText = "";
                 return;
             }
