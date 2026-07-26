@@ -629,7 +629,7 @@
             const counterEl = document.getElementById('session-counter');
             if (filteredWords.length === 0) {
                 document.getElementById('front-text').innerText = "Koniec fiszek!";
-                document.getElementById('front-desc').innerText = "Wszystkie słówka w tym filtrze opanowane.";
+                document.getElementById('front-desc').innerText = "Wszystkie słówki w tej sesji przerobione.";
                 document.getElementById('back-text').innerText = "Brawo!";
                 counterEl.innerText = "0 / 0";
                 return;
@@ -666,7 +666,7 @@
             renderCard();
         }
 
-        /* 5 SZTYWNYCH INTERWAŁÓW OCENY */
+        /* 5 PRZYCISKÓW OCENY - Z POPRAWIONĄ LOGIKĄ SPLICINGU Z KOLEJKI */
         function rateWord(level) {
             if (filteredWords.length === 0) return;
             const current = filteredWords[currentIndex];
@@ -686,6 +686,10 @@
                     const redoWord = filteredWords.splice(currentIndex, 1)[0];
                     filteredWords.push(redoWord);
                     toastMsg = "Ponawiamy dzisiaj na końcu!";
+                    
+                    if (currentIndex >= filteredWords.length) {
+                        currentIndex = 0;
+                    }
                 } else {
                     if (level === 'almost') {
                         interval = 1; // Prawie -> za 1 dzień
@@ -717,17 +721,33 @@
 
                     saveProgress();
 
-                    if (currentIndex < filteredWords.length - 1) {
-                        currentIndex++;
-                    } else {
+                    // Słówko zostało zaliczone -> usuwamy je z BIEŻĄCEJ KOLEJKI sesji
+                    filteredWords.splice(currentIndex, 1);
+
+                    if (currentIndex >= filteredWords.length) {
                         currentIndex = 0;
                     }
                 }
 
+                // Aktualizacja liczników na górze
+                updateSessionCounters();
                 showToast(toastMsg);
                 renderCurrentMode();
                 updateStatsView();
             }
+        }
+
+        function updateSessionCounters() {
+            const now = Date.now();
+            const activeWords = words.filter(w => w.status !== 'graduated');
+
+            const due = activeWords.filter(w => w.nextReviewDate <= now && w.interval > 0);
+            const newWords = activeWords.filter(w => w.interval === 0);
+            const future = activeWords.filter(w => w.nextReviewDate > now && w.interval > 0);
+
+            document.getElementById('count-due').innerText = due.length;
+            document.getElementById('count-new').innerText = newWords.length;
+            document.getElementById('count-future').innerText = future.length;
         }
 
         function renderQuiz() {
