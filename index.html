@@ -545,33 +545,64 @@
             initApp();
             setupTouchGestures();
             loadGitHubSettings();
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+            }
         });
 
+        /* NAZWY SYSTEMOWYCH GŁOSÓW "POTWORÓW / EFEKTÓW" Z MACOS DO WYKLUCZENIA */
+        const NOVELTY_VOICE_NAMES = [
+            'albert', 'bad news', 'bahh', 'bells', 'boing', 'bubbles', 
+            'cellos', 'deranged', 'fred', 'good news', 'hysterical', 
+            'junior', 'pipe organ', 'trinoids', 'whisper', 'zarvox', 'organ'
+        ];
+
+        function getBestVoice(targetLang) {
+            if (!('speechSynthesis' in window)) return null;
+            const voices = window.speechSynthesis.getVoices();
+            if (!voices || voices.length === 0) return null;
+
+            const langPrefix = targetLang.substring(0, 2).toLowerCase();
+
+            // Odfiltrowujemy głosy z czarnej listy oraz dopasowujemy język
+            const validVoices = voices.filter(v => {
+                const nameLower = v.name.toLowerCase();
+                const matchesLang = v.lang.toLowerCase().replace('_', '-').startsWith(langPrefix);
+                const isNovelty = NOVELTY_VOICE_NAMES.some(n => nameLower.includes(n));
+                return matchesLang && !isNovelty;
+            });
+
+            if (validVoices.length === 0) return null;
+
+            // Priorytet dla naturalnych głosów premium / ludzkich
+            const preferredNames = ['samantha', 'alex', 'daniel', 'karen', 'zosia', 'krzysztof', 'ewa', 'google', 'premium', 'enhanced', 'natural'];
+            const preferred = validVoices.find(v => preferredNames.some(p => v.name.toLowerCase().includes(p)));
+
+            if (preferred) return preferred;
+            return validVoices.find(v => v.default) || validVoices[0];
+        }
+
         /* PRECYZYJNY LEKTOR AUDIO (SPEECH SYNTHESIS) */
-        function speakText(text) {
+        function speakText(text, forcedLang) {
             if (!text || !('speechSynthesis' in window)) return;
             try {
                 window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(text);
                 
-                // Automatyczna detekcja: jeśli tekst zawiera polskie litery lub polskie słowa -> czytaj po polsku (pl-PL)
-                const isPolish = /[ąćęłńóśźż]/i.test(text) || /\b(to|jest|lub|oraz|oraz|jest|przeznaczony|na|ze|do)\b/i.test(text);
-                const targetLang = isPolish ? 'pl-PL' : 'en-US';
+                let targetLang = forcedLang;
+                if (!targetLang) {
+                    const isPolish = /[ąćęłńóśźż]/i.test(text) || /\b(to|jest|lub|oraz|przeznaczony|na|ze|do)\b/i.test(text);
+                    targetLang = isPolish ? 'pl-PL' : 'en-US';
+                }
 
+                const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = targetLang;
-                utterance.rate = 0.9;
+                utterance.rate = 0.95;
                 utterance.volume = 1.0;
                 utterance.pitch = 1.0;
 
-                const voices = window.speechSynthesis.getVoices();
-                if (voices && voices.length > 0) {
-                    // Wybór najlepszego pełnego głosu zamiast skompresowanego
-                    const matchedVoice = voices.find(v => 
-                        v.lang.toLowerCase().startsWith(targetLang.substring(0, 2)) && 
-                        !v.name.includes('Compact')
-                    ) || voices.find(v => v.lang.toLowerCase().startsWith(targetLang.substring(0, 2)));
-                    
-                    if (matchedVoice) utterance.voice = matchedVoice;
+                const bestVoice = getBestVoice(targetLang);
+                if (bestVoice) {
+                    utterance.voice = bestVoice;
                 }
 
                 window.speechSynthesis.speak(utterance);
@@ -738,22 +769,7 @@
             if (!filteredWords || filteredWords.length === 0) return;
             const w = filteredWords[currentIndex];
             const isReversed = cardDirection === 'EN-PL';
-            speakText(isReversed ? w.en : w.pl);
-        }
-
-        function playBackAudio(e) {
-            if (e) e.stopPropagation();
-            if (!filteredWords || filteredWords.length === 0) return;
-            const w = filteredWords[currentIndex];
-            const isReversed = cardDirection === 'EN-PL';
-            speakText(isReversed ? w.pl : w.en);
-        }
-
-        function playSentenceAudio(e) {
-            if (e) e.stopPropagation();
-            if (!filteredWords || filteredWords.length === 0) return;
-            const w = filteredWords[currentIndex];
-            if (w.sentence) speakText(w.sentence);
+            speakText(isReversed ? w.en : w.pl, isReversed ? 'en-US' : 'pl-PL');
         }
 
         function playBackAudio(e) {
@@ -819,7 +835,8 @@
         function playQuizAudio() {
             if (!filteredWords || filteredWords.length === 0) return;
             const current = filteredWords[currentIndex];
-            speakText(current.pl, 'pl-PL');
+            const isPl = /[ąćęłńóśźż]/i.test(current.pl);
+            speakText(current.pl, isPl ? 'pl-PL' : 'en-US');
         }
 
         /* NAWIGACJA POPRZEDNIA / NASTĘPNA */
