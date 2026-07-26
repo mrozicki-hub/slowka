@@ -309,11 +309,6 @@
 
         <!-- TAB 1: LEARN -->
         <section id="view-learn" style="flex: 1; display: flex; flex-direction: column;">
-            <div class="tab-switcher">
-                <button class="tab-btn active" id="btn-mode-flashcards" onclick="switchLearnMode('flashcards')">Fiszki 3D</button>
-                <button class="tab-btn" id="btn-mode-quiz" onclick="switchLearnMode('quiz')">Quiz 1 z 4</button>
-            </div>
-
             <!-- FILTRY SESJI -->
             <div class="counter-grid">
                 <div class="counter-item active" id="filter-all" onclick="filterSession('all')">
@@ -354,7 +349,6 @@
                             </div>
                             <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; width:100%;">
                                 <div class="card-text" id="front-text">Ładowanie...</div>
-                                <div id="front-ipa-container"></div>
                                 <div class="card-desc" id="front-desc"></div>
                             </div>
                             <span class="card-hint">Dotknij, aby odwrócić</span>
@@ -433,18 +427,18 @@
         <!-- TAB 2: WORDS & GENERATOR -->
         <section id="view-words" class="hidden" style="display: flex; flex-direction: column; gap: 12px;">
             <div class="form-card">
-                <div class="form-title">➕ Generator Słówek (Bezpieczne cudzysłowy)</div>
-                <p style="font-size: 11px; color: var(--text-sub); line-height: 1.3;">
-                    Wklej pozycje w formacie: <br>
+                <div class="form-title">➕ Inteligentny Generator Słówek (Duże ilości)</div>
+                <p style="font-size: 11px; color: var(--text-sub); line-height: 1.35;">
+                    Obsługuje dowolną liczbę linii! Możesz wkleić dane z Excela, Worda lub tekstu:<br>
                     <code style="color:var(--accent-blue)">Słowo - Definicja | IPA | Zdanie | Kategoria</code>
                 </p>
-                <textarea id="bulk-input" rows="4" placeholder="Abstrahować - Pomijać szczegóły | /abstrakɔˈvat͡ɕ/ | Abstrahując od finansów, projekt jest sukcesem. | Czasownik" style="background:var(--bg-main); border:1px solid var(--border-color); color:#fff; padding:10px; border-radius:10px; font-size:12px; font-family:monospace;"></textarea>
+                <textarea id="bulk-input" rows="5" placeholder="Abstrahować - Pomijać szczegóły | /abstrakɔˈvat͡ɕ/ | Abstrahując od finansów, projekt jest sukcesem. | Czasownik" style="background:var(--bg-main); border:1px solid var(--border-color); color:#fff; padding:10px; border-radius:10px; font-size:12px; font-family:monospace;"></textarea>
                 <button class="btn-primary" onclick="generateWordsJsCode()">Wygeneruj kod dla words.js</button>
             </div>
 
             <div id="generated-code-box" class="form-card hidden" style="border-color: var(--accent-green);">
                 <div class="form-title" style="color: var(--accent-green);">✅ Wygenerowany kod JavaScript:</div>
-                <textarea id="generated-code-text" rows="5" readonly style="background:var(--bg-main); border:1px solid var(--border-color); color:#fff; padding:10px; border-radius:10px; font-size:11px; font-family:monospace;"></textarea>
+                <textarea id="generated-code-text" rows="6" readonly style="background:var(--bg-main); border:1px solid var(--border-color); color:#fff; padding:10px; border-radius:10px; font-size:11px; font-family:monospace;"></textarea>
                 <button class="btn-secondary" onclick="copyGeneratedCode()">Kopiuj kod do schowka</button>
             </div>
 
@@ -538,10 +532,8 @@
         let currentIndex = 0;
         let isFlipped = false;
         let activeFilter = 'all';
-        let currentLearnMode = 'flashcards';
         let cardDirection = 'PL-EN';
 
-        // Pamięć podręczna załadowanych głosów systemowych
         let availableVoices = [];
 
         function loadSystemVoices() {
@@ -563,7 +555,6 @@
             }
         });
 
-        /* NAZWY SYSTEMOWYCH GŁOSÓW "POTWORÓW / EFEKTÓW" Z MACOS DO WYKLUCZENIA */
         const NOVELTY_VOICE_NAMES = [
             'albert', 'bad news', 'bahh', 'bells', 'boing', 'bubbles', 
             'cellos', 'deranged', 'fred', 'good news', 'hysterical', 
@@ -573,13 +564,11 @@
         function getBestVoice(targetLang) {
             if (!('speechSynthesis' in window)) return null;
             
-            // Pobieramy aktualną listę głosów
             let voices = availableVoices.length > 0 ? availableVoices : window.speechSynthesis.getVoices();
             if (!voices || voices.length === 0) return null;
 
-            const langPrefix = targetLang.substring(0, 2).toLowerCase(); // np. 'en' lub 'pl'
+            const langPrefix = targetLang.substring(0, 2).toLowerCase();
 
-            // Odfiltrowujemy głosy efektowe oraz dopasowujemy język
             let validVoices = voices.filter(v => {
                 const nameLower = v.name.toLowerCase();
                 const matchesLang = v.lang.toLowerCase().replace('_', '-').startsWith(langPrefix);
@@ -587,21 +576,18 @@
                 return matchesLang && !isNovelty;
             });
 
-            // Jeśli dla angielskiego nie znaleziono idealnego dopasowania, bierzemy dowolny głos angielski
             if (validVoices.length === 0 && langPrefix === 'en') {
                 validVoices = voices.filter(v => v.lang.toLowerCase().includes('en'));
             }
 
             if (validVoices.length === 0) return null;
 
-            // Priorytet dla znanych, naturalnych głosów premium / ludzkich
             const preferredNames = ['samantha', 'alex', 'daniel', 'karen', 'zosia', 'krzysztof', 'ewa', 'google', 'premium', 'enhanced', 'natural'];
             const preferred = validVoices.find(v => preferredNames.some(p => v.name.toLowerCase().includes(p)));
 
             return preferred || validVoices[0];
         }
 
-        /* PRECYZYJNY LEKTOR AUDIO (SPEECH SYNTHESIS) */
         function speakText(text, forcedLang) {
             if (!text || !('speechSynthesis' in window)) return;
             try {
@@ -679,17 +665,6 @@
             if (tabId === 'learn') applyLearningSession();
         }
 
-        function switchLearnMode(mode) {
-            currentLearnMode = mode;
-            ['flashcards', 'quiz'].forEach(m => {
-                document.getElementById(`mode-${m}`).classList.add('hidden');
-                document.getElementById(`btn-mode-${m}`).classList.remove('active');
-            });
-            document.getElementById(`mode-${mode}`).classList.remove('hidden');
-            document.getElementById(`btn-mode-${mode}`).classList.add('active');
-            renderCurrentMode();
-        }
-
         function filterSession(type) {
             activeFilter = type;
             ['all', 'due', 'new', 'future'].forEach(f => {
@@ -723,15 +698,9 @@
             else filteredWords = [...activeWords];
 
             currentIndex = 0;
-            renderCurrentMode();
+            renderCard();
         }
 
-        function renderCurrentMode() {
-            if (currentLearnMode === 'flashcards') renderCard();
-            else if (currentLearnMode === 'quiz') renderQuiz();
-        }
-
-        /* 1. RENDERING FISZKI 3D */
         function renderCard() {
             const inner = document.getElementById('card-inner');
             if (inner) inner.classList.remove('flipped');
@@ -741,7 +710,6 @@
             if (!filteredWords || filteredWords.length === 0) {
                 document.getElementById('front-text').innerText = "Brak fiszek w tej grupie!";
                 document.getElementById('front-desc').innerText = "Wszystkie słówka zostały przerobione lub grupa jest pusta.";
-                document.getElementById('front-ipa-container').innerHTML = "";
                 document.getElementById('back-text').innerText = "Gratulacje!";
                 document.getElementById('back-ipa-container').innerHTML = "";
                 document.getElementById('back-sentence-container').classList.add('hidden');
@@ -755,19 +723,16 @@
             const w = filteredWords[currentIndex];
             const isReversed = cardDirection === 'EN-PL';
 
-            // Przód
             document.getElementById('front-lang-title').innerText = isReversed ? "Definicja" : "Słowo";
             document.getElementById('front-text').innerText = isReversed ? w.en : w.pl;
             document.getElementById('front-desc').innerText = w.desc || "";
-            document.getElementById('front-ipa-container').innerHTML = (!isReversed && w.ipa) ? `<span class="card-ipa">${w.ipa}</span>` : "";
 
-            // Tył
             document.getElementById('back-lang-title').innerText = isReversed ? "Słowo" : "Definicja / Opis";
             document.getElementById('back-text').innerText = isReversed ? w.pl : w.en;
             document.getElementById('back-desc').innerText = w.desc || "";
-            document.getElementById('back-ipa-container').innerHTML = (isReversed && w.ipa) ? `<span class="card-ipa">${w.ipa}</span>` : "";
+            // Transkrypcja IPA jest wyświetlana wyłącznie na odwrocie fiszki, aby nie naprowadzać przed odpowiedzią
+            document.getElementById('back-ipa-container').innerHTML = w.ipa ? `<span class="card-ipa">${w.ipa}</span>` : "";
 
-            // Zdanie
             const sentenceBox = document.getElementById('back-sentence-container');
             if (w.sentence) {
                 document.getElementById('back-sentence-text').innerText = w.sentence;
@@ -809,66 +774,16 @@
             }
         }
 
-        /* 2. RENDERING QUIZ 1 Z 4 */
-        function renderQuiz() {
-            const container = document.getElementById('quiz-options-container');
-            container.innerHTML = "";
-            if (!filteredWords || filteredWords.length === 0) {
-                document.getElementById('quiz-question-text').innerText = "Brak słówek!";
-                document.getElementById('quiz-ipa-container').innerHTML = "";
-                return;
-            }
-
-            if (currentIndex >= filteredWords.length) currentIndex = 0;
-            const current = filteredWords[currentIndex];
-            document.getElementById('quiz-question-text').innerText = current.pl;
-            document.getElementById('quiz-ipa-container').innerHTML = current.ipa ? `<span class="card-ipa">${current.ipa}</span>` : "";
-
-            let options = [current.en];
-            let otherWords = words.filter(w => w.id !== current.id && w.en);
-            otherWords.sort(() => 0.5 - Math.random());
-            for (let i = 0; i < Math.min(3, otherWords.length); i++) {
-                options.push(otherWords[i].en);
-            }
-            options.sort(() => 0.5 - Math.random());
-
-            options.forEach(opt => {
-                const btn = document.createElement('button');
-                btn.className = 'quiz-opt-btn';
-                btn.innerText = opt;
-                btn.onclick = () => {
-                    const isPl = /[ąćęłńóśźż]/i.test(opt);
-                    speakText(opt, isPl ? 'pl-PL' : 'en-US');
-                    if (opt === current.en) {
-                        btn.classList.add('correct');
-                        setTimeout(() => rateWord('good'), 600);
-                    } else {
-                        btn.classList.add('wrong');
-                        setTimeout(() => rateWord('redo'), 1000);
-                    }
-                };
-                container.appendChild(btn);
-            });
-        }
-
-        function playQuizAudio() {
-            if (!filteredWords || filteredWords.length === 0) return;
-            const current = filteredWords[currentIndex];
-            const isPl = /[ąćęłńóśźż]/i.test(current.pl);
-            speakText(current.pl, isPl ? 'pl-PL' : 'en-US');
-        }
-
-        /* NAWIGACJA POPRZEDNIA / NASTĘPNA */
         function nextCard() {
             if (!filteredWords || filteredWords.length === 0) return;
             currentIndex = (currentIndex + 1) % filteredWords.length;
-            renderCurrentMode();
+            renderCard();
         }
 
         function prevCard() {
             if (!filteredWords || filteredWords.length === 0) return;
             currentIndex = (currentIndex - 1 + filteredWords.length) % filteredWords.length;
-            renderCurrentMode();
+            renderCard();
         }
 
         function rateWord(level) {
@@ -915,7 +830,7 @@
                 }
 
                 showToast(toastMsg);
-                renderCurrentMode();
+                renderCard();
                 updateStatsView();
             }
         }
@@ -936,28 +851,85 @@
 
         function escapeJS(str) {
             if (!str) return "";
-            return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, ' ');
+            return str
+                .replace(/\\/g, '\\\\')
+                .replace(/"/g, '\\"')
+                .replace(/`/g, '\\`')
+                .replace(/\r?\n/g, ' ');
+        }
+
+        function parseBulkLine(line) {
+            line = line.trim();
+            if (!line) return null;
+
+            let pipeParts = line.split('|').map(s => s.trim());
+            if (pipeParts.length >= 2 && !line.includes(' - ') && !line.includes(' – ') && !line.includes(' — ') && !line.includes(' : ')) {
+                return {
+                    pl: pipeParts[0] || "",
+                    en: pipeParts[1] || "",
+                    ipa: pipeParts[2] || "",
+                    sentence: pipeParts[3] || "",
+                    desc: pipeParts[4] || ""
+                };
+            }
+
+            let sepIndex = -1;
+            let sepLen = 1;
+
+            const match = line.match(/\s+[-–—:]\s+|\t|:\s+/);
+            if (match) {
+                sepIndex = match.index;
+                sepLen = match[0].length;
+            } else {
+                const firstHyphen = line.indexOf('-');
+                const firstColon = line.indexOf(':');
+                if (firstHyphen !== -1 && (firstColon === -1 || firstHyphen < firstColon)) {
+                    sepIndex = firstHyphen;
+                    sepLen = 1;
+                } else if (firstColon !== -1) {
+                    sepIndex = firstColon;
+                    sepLen = 1;
+                }
+            }
+
+            if (sepIndex === -1) return null;
+
+            const pl = line.substring(0, sepIndex).trim();
+            const rest = line.substring(sepIndex + sepLen).trim();
+
+            const subParts = rest.split('|').map(s => s.trim());
+            const en = subParts[0] || "";
+            const ipa = subParts[1] || "";
+            const sentence = subParts[2] || "";
+            const desc = subParts[3] || "";
+
+            if (!pl || !en) return null;
+
+            return { pl, en, ipa, sentence, desc };
         }
 
         function generateWordsJsCode() {
             const input = document.getElementById('bulk-input').value.trim();
-            if (!input) { showToast("Wpisz tekst!"); return; }
+            if (!input) { showToast("Wpisz lub wklej tekst!"); return; }
 
             const lines = input.split('\n');
             let result = [];
+            let skipped = [];
 
-            lines.forEach(l => {
-                if (!l.trim()) return;
-                const mainParts = l.split(/[-:]+/);
-                if (mainParts.length >= 2) {
-                    const pl = escapeJS(mainParts[0].trim());
-                    const subParts = mainParts[1].split('|');
-                    const en = escapeJS(subParts[0] ? subParts[0].trim() : "");
-                    const ipa = escapeJS(subParts[1] ? subParts[1].trim() : "");
-                    const sentence = escapeJS(subParts[2] ? subParts[2].trim() : "");
-                    const desc = escapeJS(subParts[3] ? subParts[3].trim() : "");
+            lines.forEach((l, idx) => {
+                const trimmed = l.trim();
+                if (!trimmed) return;
 
+                const parsed = parseBulkLine(trimmed);
+                if (parsed) {
+                    const pl = escapeJS(parsed.pl);
+                    const en = escapeJS(parsed.en);
+                    const ipa = escapeJS(parsed.ipa);
+                    const sentence = escapeJS(parsed.sentence);
+                    const desc = escapeJS(parsed.desc);
                     result.push(`  { pl: "${pl}", en: "${en}", ipa: "${ipa}", sentence: "${sentence}", desc: "${desc}" }`);
+                } else {
+                    skipped.push(`Linia ${idx + 1}: ${trimmed}`);
                 }
             });
 
@@ -965,7 +937,15 @@
                 const code = `window.myVocabularyList = [\n${result.join(',\n')}\n];`;
                 document.getElementById('generated-code-text').value = code;
                 document.getElementById('generated-code-box').classList.remove('hidden');
-                showToast(`Wygenerowano kod dla ${result.length} haseł!`);
+
+                let msg = `Wygenerowano kod dla ${result.length} haseł!`;
+                if (skipped.length > 0) {
+                    msg += ` (Pominięto ${skipped.length} niepoprawnych linii)`;
+                    console.warn("Pominięte linie:", skipped);
+                }
+                showToast(msg);
+            } else {
+                showToast("Nie udało się sparsować linii. Sprawdź format!");
             }
         }
 
@@ -1120,7 +1100,7 @@
             const t = document.getElementById('toast');
             document.getElementById('toast-txt').innerText = msg;
             t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 2500);
+            setTimeout(() => t.classList.remove('show'), 3000);
         }
     </script>
 </body>
