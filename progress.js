@@ -1,8 +1,8 @@
 window.myProgressData = {
   "w_S29zbW9sb2dpYSAoMSlfwqtuYXVrYSB6YWptdWrEhWNhIHNpxJk=": {
-    "status": "10d",
-    "interval": 10,
-    "nextReviewDate": 1785949142836
+    "status": "1d",
+    "interval": 1,
+    "nextReviewDate": 1785239892882
   },
   "w_S29zbW9sb2dpYSAoMilfwqt6ZXNww7PFgiB3eW9icmHFvGXFhCBvIA==": {
     "status": "1d",
@@ -17,12 +17,12 @@ window.myProgressData = {
   "w_RWd6YWx0YWNqYV/Cq3ByemVzYWRhIHcgb2thenl3YW4=": {
     "status": "10d",
     "interval": 10,
-    "nextReviewDate": 1785949163206
+    "nextReviewDate": 1786017516884
   },
   "w_UmFjaGl0eWN6bnkgKDEpX8Krc8WCYWJvIHJvendpbmnEmXR5LCB3": {
-    "status": "30d",
-    "interval": 30,
-    "nextReviewDate": 1787677167039
+    "status": "1d",
+    "interval": 1,
+    "nextReviewDate": 1785239923702
   },
   "w_UmFjaGl0eWN6bnkgKDIpX2Rhdy4gwqttYWrEhWN5IG9iamF3eSA=": {
     "status": "1d",
@@ -30,9 +30,9 @@ window.myProgressData = {
     "nextReviewDate": 1785171571540
   },
   "w_RGVzYWtyYWxpemFjamFfwqtwb3piYXdpZW5pZSBjemVnb8WbIA==": {
-    "status": "30d",
-    "interval": 30,
-    "nextReviewDate": 1787687188659
+    "status": "10d",
+    "interval": 10,
+    "nextReviewDate": 1786017532621
   },
   "w_RXNrYWxhY2phX8Krc3RvcG5pb3dlIHp3acSZa3N6YW4=": {
     "status": "1d",
